@@ -1,0 +1,9 @@
+{
+  "thingsboardApiEndpoint": "http://cd-lot.lihero.com:9090",
+  "appLinksUrlHost": "cd-lot.lihero.com:9090",
+  "appLinksUrlScheme": "http",
+  "androidApplicationId": "com.lihero.app.android",
+  "androidApplicationName": "LIHERO物联网平台",
+  "thingsboardOAuth2CallbackUrlScheme": "com.lihero.app.android.auth",
+  "thingsboardAndroidAppSecret": "REPLACE_WITH_YOUR_ANDROID_APP_SECRET"
+}
