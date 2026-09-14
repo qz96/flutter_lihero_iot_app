@@ -1,3 +1,10 @@
+/*
+ * @Author: 李龙杰
+ * @Date: 2026-08-13 16:19:49
+ * @LastEditors: 李龙杰
+ * @LastEditTime: 2026-09-01 08:41:52
+ * @Description: 
+ */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:thingsboard_app/core/auth/login/models/login_state.dart';
@@ -50,12 +57,13 @@ class _HomePageState extends ConsumerState<HomePage>
       return const SizedBox();
     }
     if (homeDashboard != null) {
-      return HomeDashboardPage(homeDashboard,key: ValueKey(homeDashboard.dashboardId?.id), );
+      return HomeDashboardPage(
+        homeDashboard,
+        key: ValueKey(homeDashboard.dashboardId?.id),
+      );
     }
     return _buildDefaultHome(context);
   }
-
- 
 
   Widget _buildDefaultHome(BuildContext context) {
     if (getIt<ITbClientService>().client.isSystemAdmin()) {

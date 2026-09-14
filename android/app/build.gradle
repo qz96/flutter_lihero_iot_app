@@ -43,7 +43,7 @@ def appLinksUrlScheme = getDartDefineValue('appLinksUrlScheme') ?: 'https'
 android {
 namespace "org.thingsboard.app"
     ndkVersion "29.0.13113456 rc1"
-    compileSdkVersion 35
+    compileSdkVersion 36
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
@@ -86,6 +86,7 @@ compileOptions {
         coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
         implementation 'androidx.window:window:1.0.0'
         implementation 'androidx.window:window-java:1.0.0'
+        testImplementation 'junit:junit:4.13.2'
     }
     android.applicationVariants.all { variant ->
     variant.outputs.all { output ->

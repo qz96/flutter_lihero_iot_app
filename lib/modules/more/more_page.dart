@@ -78,7 +78,15 @@ class MorePage extends HookConsumerWidget {
                     ),
                   ),
                 ),
-               ],
+                ],
+                MoreMenuItemWidget(
+                  const TbMainNavigationItem(
+                    title: 'RTU 采集器',
+                    icon: Icons.sensors,
+                    path: '/rtu',
+                  ),
+                  onTap: () => context.push('/rtu'),
+                ),
                 Divider(
                   color: Colors.black.withValues(alpha: .05),
                   thickness: 1,
