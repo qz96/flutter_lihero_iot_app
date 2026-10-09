@@ -87,6 +87,14 @@ class MorePage extends HookConsumerWidget {
                   ),
                   onTap: () => context.push('/rtu'),
                 ),
+                MoreMenuItemWidget(
+                  const TbMainNavigationItem(
+                    title: '井下采样器 CYX7',
+                    icon: Icons.inventory_2_outlined,
+                    path: '/cyx7',
+                  ),
+                  onTap: () => context.push('/cyx7'),
+                ),
                 Divider(
                   color: Colors.black.withValues(alpha: .05),
                   thickness: 1,

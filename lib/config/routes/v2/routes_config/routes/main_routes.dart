@@ -5,6 +5,7 @@ import 'package:thingsboard_app/config/routes/v2/routes_config/routes/alarm_rout
 import 'package:thingsboard_app/config/routes/v2/routes_config/routes/asset_routes.dart';
 import 'package:thingsboard_app/config/routes/v2/routes_config/routes/audit_log_routes.dart';
 import 'package:thingsboard_app/config/routes/v2/routes_config/routes/customer_routes.dart';
+import 'package:thingsboard_app/config/routes/v2/routes_config/routes/cyx7_routes.dart';
 import 'package:thingsboard_app/config/routes/v2/routes_config/routes/dashboard_routes.dart';
 import 'package:thingsboard_app/config/routes/v2/routes_config/routes/device_routes.dart';
 import 'package:thingsboard_app/config/routes/v2/routes_config/routes/esp_provisioning_routes.dart';
@@ -13,6 +14,7 @@ import 'package:thingsboard_app/config/routes/v2/routes_config/routes/more_route
 import 'package:thingsboard_app/config/routes/v2/routes_config/routes/notification_routes.dart';
 import 'package:thingsboard_app/config/routes/v2/routes_config/routes/profile_routes.dart';
 import 'package:thingsboard_app/config/routes/v2/routes_config/routes/rtu_routes.dart';
+import 'package:thingsboard_app/config/routes/v2/routes_config/routes/ui_utils_routes.dart';
 import 'package:thingsboard_app/config/routes/v2/routes_config/routes/url_routes.dart';
 import 'package:thingsboard_app/modules/main/navigation_page.dart';
 
@@ -30,6 +32,8 @@ final allMainPages = [
   ...espProvisioningRoutes,
   ...profileRoutes,
   ...rtuRoutes,
+  ...cyx7Routes,
+  ...uiUtilsRoutes,
 ];
 List<RouteBase> getMainRoutes() {
   return [
