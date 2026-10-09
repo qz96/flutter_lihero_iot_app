@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_background_app_color_radiu_15dp_top"
+        android:gravity="center"
+        android:padding="15dp"
+        android:text="标题栏"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
+    <LinearLayout
+        android:id="@+id/ll_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_title"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:padding="15dp">
+
+        <TextView
+            android:id="@+id/tv_field_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="阀门开关状态:" />
+
+        <Switch
+            android:id="@+id/sw_tap_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="5dp"
+            android:textSize="14sp"
+            android:textOn="开启"
+            android:textOff="关闭"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="(手动设置开关状态,非开启或关闭阀门)"
+            android:textColor="@color/color_black_333333"
+            android:textSize="12sp"
+            android:layout_gravity="center_vertical"
+            />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/ll_bottom_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ll_content"
+        android:background="@drawable/shape_background_white_radiu_15dp_bottom"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="15dp"
+            android:text="取 消"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_ok"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:padding="15dp"
+            android:text="确 认"
+            android:textColor="@android:color/holo_blue_light"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_alignTop="@+id/ll_bottom_btn"
+        android:background="@color/color_white_e0e2e8" />
+
+</RelativeLayout>

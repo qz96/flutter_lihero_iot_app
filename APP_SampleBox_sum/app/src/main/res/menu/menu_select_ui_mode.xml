@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.android.peter.menudemo.MenuDemoActivity">
+    <item
+        android:id="@+id/ui_mode"
+        android:orderInCategory="100"
+        android:title="@string/ui_mode"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/order_mode"
+        android:orderInCategory="100"
+        android:title="@string/order_mode"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/version_upgrade"
+        android:orderInCategory="100"
+        android:title="设备升级"
+        app:showAsAction="never" />
+</menu>

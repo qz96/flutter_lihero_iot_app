@@ -1,0 +1,48 @@
+package com.lh.lhble.UI;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.Window;
+import android.view.WindowManager;
+
+import com.githang.statusbar.StatusBarCompat;
+import com.lh.lhble.R;
+
+public class LaunchActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        StatusBarCompat.setStatusBarColor(this, Color.parseColor("#e6e6e6"), true);
+
+        getWindow().setFormat(PixelFormat.RGBA_8888);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DITHER);
+
+        setContentView(R.layout.activity_launch);
+
+        new Handler(){
+            public void handleMessage(android.os.Message msg) {
+                Intent i = new Intent(LaunchActivity.this, LoginActivity.class);
+                startActivity(i);
+                finish();
+            };
+        }.sendEmptyMessageDelayed(0, 2000);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+}

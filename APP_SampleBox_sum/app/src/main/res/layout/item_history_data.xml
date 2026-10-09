@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/shape_background_white_radiu_10dp"
+    android:padding="12dp"
+    android:layout_marginBottom="8dp">
+
+    <!-- 第一行：数据标识和时间 -->
+    <LinearLayout
+        android:id="@+id/ll_row1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/tv_data_flag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="未上传"
+            android:textSize="12sp"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/shape_background_app_color_radiu_5dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:layout_gravity="center_vertical" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tv_data_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2026-06-24 10:30:30"
+            android:textSize="13sp"
+            android:textColor="#666666" />
+    </LinearLayout>
+
+    <!-- 第二行：MN号和操作账号 -->
+    <LinearLayout
+        android:id="@+id/ll_row2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="6dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MN号"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_mn_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="操作账号"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_operator_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 第三行：流速和流量 -->
+    <LinearLayout
+        android:id="@+id/ll_row3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="6dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="流速"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_velocity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- m/s"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="瞬时流量"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_flow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- m³/s"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="水深"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_water_depth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- m"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 第四行：水温和水位 -->
+    <LinearLayout
+        android:id="@+id/ll_row4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="6dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="水温"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_water_temp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- ℃"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="过水面积"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- m²"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="水位"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_water_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- m"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 第五行：俯仰角、横滚角、安装高度 -->
+    <LinearLayout
+        android:id="@+id/ll_row5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="俯仰角"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_pitch_angle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- °"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="横滚角"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_roll_angle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- °"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="安装高度"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_install_height"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- m"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 第六行：河底高程和电源电压 -->
+    <LinearLayout
+        android:id="@+id/ll_row6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="河底高程"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_riverbed_elevation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- mm"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="电源电压"
+                android:textSize="11sp"
+                android:textColor="#999999" />
+
+            <TextView
+                android:id="@+id/tv_battery_voltage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-- V"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+</LinearLayout>

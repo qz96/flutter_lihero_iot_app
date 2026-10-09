@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <!-- 主内容区 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- 提示信息 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/shape_background_white_radiu_10dp"
+            android:padding="12dp"
+            android:layout_margin="10dp">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@mipmap/ic_sheet"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="下拉刷新，上拉加载更多"
+                android:textColor="#666666"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- 历史记录列表 -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <ListView
+                android:id="@+id/lv_history_data"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="#E0E0E0"
+                android:dividerHeight="1dp"
+                android:padding="10dp" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <!-- 空数据提示 -->
+        <TextView
+            android:id="@+id/tv_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="暂无历史数据"
+            android:textColor="#999999"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <!-- 加载更多提示 -->
+        <TextView
+            android:id="@+id/tv_load_more"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="15dp"
+            android:text="上拉加载更多"
+            android:textColor="#666666"
+            android:textSize="14sp"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- 右下角浮动按钮 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:orientation="vertical"
+        android:layout_margin="20dp">
+
+        <!-- 列字段选择按钮 -->
+        <ImageButton
+            android:id="@+id/fab_column_select"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="16dp"
+            android:src="@mipmap/ic_sheet"
+            android:background="@drawable/shape_background_app_color_radiu_10dp"
+            android:scaleType="centerInside"
+            android:padding="12dp"
+            android:elevation="4dp" />
+
+        <!-- 导出CSV按钮 -->
+        <ImageButton
+            android:id="@+id/fab_export_csv"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@mipmap/ic_sample_save"
+            android:background="@drawable/shape_background_green_color_radiu_15dp"
+            android:scaleType="centerInside"
+            android:padding="12dp"
+            android:elevation="4dp" />
+
+    </LinearLayout>
+
+</FrameLayout>

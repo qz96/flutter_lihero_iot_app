@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.lh.lhble">
+
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" /><!-- 版本更新权限 -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!-- 6.0之后蓝牙还需要地理位置权限 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- 自行判断 -->
+    <uses-feature
+        android:name="android.hardware.bluetooth.le"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.OVERRIDE_WIFI_CONFIG"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.TETHER_PRIVILEGED"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-permission
+        android:name="android.permission.INTERACT_ACROSS_USERS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.MANAGE_USERS"
+        tools:ignore="ProtectedPermissions" />
+
+
+    <application
+        android:name="com.lh.lhble.base.HJBleApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/icon"
+        android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/icon"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+
+        <activity
+            android:name=".UI.LoginActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.lh.lhble.UI.ScanBleActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name="com.lh.lhble.UI.BluetoothControlActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".UI.LiherActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".UI.DYBleActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity android:name=".UI.LiherCYXActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherZKYActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherYSXActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+
+        <activity android:name=".UI.LiherAdvancedBottleActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+
+        <activity
+            android:name=".UI.LiherShortBottleActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
+
+        <activity android:name=".UI.LiherGGCYActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity
+            android:name="com.lh.lhble.UI.SetActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name="com.lh.lhble.UI.BlueOTAActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"></activity>
+
+
+        <activity android:name=".UI.LiherSWJ1Activity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherDXCYXActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherDXCYX2Activity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherDXCYX3Activity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="地下采样箱3"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherCYX4Activity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="单瓶采样箱"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherCYX5Activity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="0D05便携式采样箱"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherCYX6Activity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="便携式水质自动采样器"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+            />
+        <activity android:name=".UI.LiherRTUActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="力合RTU"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity
+            android:name=".google.zxing.activity.CaptureActivity"
+            android:label="zxing扫码页面" />
+
+        <activity android:name=".UI.LhBleListOrderActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="批量力合蓝牙设备发送指令"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherCYXRTUActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="力合采样设备内置RTU"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherCYX7Activity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="力合采样箱16"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+
+        <activity android:name=".UI.LiherRTULLJ485SetActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="RTU流量计-基础配置"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherCYXParamSetActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="采样箱参数校准"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherADCPActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="手持式多普勒流量计(LHADCP)主界面"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherADCPSingleMeasureActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="单点测量"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherADCPRealtimeDataActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="实时数据面板"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherADCPParamSettingsActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:label="参数设置与校准"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+        <activity android:name=".UI.LiherADCPHistoryActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="landscape"
+            android:label="历史数据"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            />
+
+        <service
+            android:name="com.lh.lhble.base.ApService"
+            android:process=":ap">
+
+        </service>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/lh_file_paths" />
+        </provider>
+
+    </application>
+
+
+</manifest>

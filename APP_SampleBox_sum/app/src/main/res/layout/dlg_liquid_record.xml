@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+     >
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:text="标题栏"
+        android:textSize="18sp"
+        android:textColor="@color/color_white_ffffff"
+        android:gravity="center"
+        android:background="@drawable/shape_background_app_color_radiu_15dp_top"
+        />
+    <LinearLayout
+        android:id="@+id/ll_liquid_reset_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_title"
+        android:orientation="horizontal"
+        android:background="@color/color_white_ffffff"
+        android:padding="15dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="母液更换时间："/>
+        <TextView
+            android:id="@+id/tv_liquid_reset_time"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:hint="请选择日期时间"
+            android:padding="5dp"
+            android:gravity="center"
+            android:textColor="@color/color_app_normal"
+            />
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_liquid_out_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_title"
+        android:orientation="horizontal"
+        android:background="@color/color_white_ffffff"
+        android:padding="15dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="母液过期时间："/>
+        <TextView
+            android:id="@+id/tv_liquid_out_time"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:hint="请选择日期时间"
+            android:padding="5dp"
+            android:gravity="center"
+            android:textColor="@color/color_app_normal"
+            />
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/shape_background_white_radiu_15dp_bottom"
+        android:layout_below="@+id/lv_samplecars">
+        <TextView
+            android:id="@+id/tv_cancel"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="返 回"
+            android:textSize="16sp"
+            android:padding="15dp"
+            android:textColor="@color/color_black_999999"
+            android:gravity="center"
+            />
+        <TextView
+            android:id="@+id/tv_ok"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="修 改"
+            android:textSize="16sp"
+
+            android:padding="15dp"
+            android:textColor="#69c326"
+            android:gravity="center"
+            />
+    </LinearLayout>
+
+</LinearLayout>

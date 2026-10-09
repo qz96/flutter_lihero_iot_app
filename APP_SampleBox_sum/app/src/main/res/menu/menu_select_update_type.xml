@@ -1,0 +1,25 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.android.peter.menudemo.MenuDemoActivity">
+    <item
+        android:id="@+id/update_all"
+        android:orderInCategory="100"
+        android:title="全部上传"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/update_gps"
+        android:orderInCategory="100"
+        android:title="GPS上传"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/update_water"
+        android:orderInCategory="100"
+        android:title="水参数上传"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/update_no"
+        android:orderInCategory="100"
+        android:title="不主动上传"
+        app:showAsAction="never" />
+</menu>

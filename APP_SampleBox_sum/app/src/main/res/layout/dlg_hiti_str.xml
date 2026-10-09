@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+     >
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:text="标题栏"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:background="@drawable/shape_background_app_color_radiu_15dp_top"
+         />
+
+   <TextView
+       android:id="@+id/tv_dlg_content"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="内容信息..."
+       android:minHeight="150dp"
+       android:padding="15dp"
+       android:gravity="center"
+       android:layout_below="@+id/tv_title"
+       android:background="@android:color/white"
+       />
+
+    <LinearLayout
+        android:id="@+id/ll_bottom_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/shape_background_white_radiu_15dp_bottom"
+        android:layout_below="@+id/tv_dlg_content">
+        <TextView
+            android:id="@+id/tv_cancel"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:textSize="16sp"
+            android:padding="15dp"
+            android:gravity="center"
+            />
+        <TextView
+            android:id="@+id/tv_ok"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/ensure"
+            android:textSize="16sp"
+            android:padding="15dp"
+            android:textColor="@android:color/holo_blue_light"
+            android:gravity="center"
+            />
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/color_white_e0e2e8"
+        android:layout_alignTop="@+id/ll_bottom_btn"
+        />
+
+</RelativeLayout>

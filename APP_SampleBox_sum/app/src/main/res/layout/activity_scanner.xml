@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp">
+        <ImageView
+            android:id="@+id/iv_go_back"
+            android:layout_width="25dp"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:src="@mipmap/ic_black_go_back"/>
+        <EditText
+            android:id="@+id/ed_code_input"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:hint="手动录入数据"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:maxLength="50"
+            android:digits="0123456789_-#:zxcvbnmasdfghjklqwertyuiopZXCVBNMASDFGHJKLQWERTYUIOP"
+            />
+        <TextView
+            android:id="@+id/tv_code_input"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="   提 交   "
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            android:layout_marginLeft="10dp"
+            android:background="@android:color/holo_green_light"
+            />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <SurfaceView
+            android:id="@+id/scanner_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"/>
+
+        <com.lh.lhble.google.zxing.view.ViewfinderView
+            android:id="@+id/viewfinder_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:corner_color="@color/corner_color"
+            app:frame_color="@color/viewfinder_frame"
+            app:label_text="扫描二维码/条形码"
+            app:label_text_color="@color/colorPrimary"
+            app:label_text_size="40"
+            app:laser_color="@color/laser_color"
+            app:mask_color="@color/viewfinder_mask"
+            app:result_color="@color/result_view"
+            app:result_point_color="@color/result_point_color"/>
+        <TextView
+            android:id="@+id/tv_light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:text="开启闪关灯"
+            android:layout_marginBottom="60dp"
+            android:textColor="@color/viewfinder_frame"/>
+    </FrameLayout>
+
+</LinearLayout>

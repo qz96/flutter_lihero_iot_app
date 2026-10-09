@@ -1,0 +1,50 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.android.peter.menudemo.MenuDemoActivity">
+    <item
+        android:id="@+id/sample_485_mode"
+        android:orderInCategory="1"
+        android:title="维护模式"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sample_time_mode"
+        android:orderInCategory="2"
+        android:title="等时模式"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sample_rain_mode"
+        android:orderInCategory="3"
+        android:title="雨量触发模式"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sample_mix_mode"
+        android:orderInCategory="4"
+        android:title="单触发模式"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sample_plan_mode"
+        android:orderInCategory="5"
+        android:title="定时采样模式"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sample_water_mode"
+        android:orderInCategory="6"
+        android:title="液位触发模式"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sample_test_mode"
+        android:orderInCategory="7"
+        android:title="采样流程测试"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sample_cy_num_mode"
+        android:orderInCategory="8"
+        android:title="等比例采样"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/sample_jk_mode"
+        android:orderInCategory="13"
+        android:title="疾控模式"
+        app:showAsAction="never" />
+</menu>

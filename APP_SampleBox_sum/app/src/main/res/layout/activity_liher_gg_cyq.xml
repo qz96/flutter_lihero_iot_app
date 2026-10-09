@@ -1,0 +1,968 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <RelativeLayout
+        android:id="@+id/top_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+		android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="日志："
+                android:textColor="@android:color/black" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true">
+
+            <TextView
+                android:id="@+id/start_test"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_background"
+                android:padding="5dp"
+                android:text="开始测试"
+				android:textStyle="italic"
+                android:textColor="@android:color/white"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/stop_test"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="25dp"
+                android:background="@drawable/button_background"
+                android:padding="5dp"
+                android:text="停止测试"
+				android:textStyle="italic"
+                android:textColor="@android:color/white"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/clear_log"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_background"
+                android:paddingLeft="8dp"
+                android:paddingTop="5dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="5dp"
+                android:text="清 屏"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@+id/top_layout"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin">
+
+        <ScrollView
+            android:id="@+id/scl_orders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/shape_background_circle_blue_10dp"
+            android:scrollbars="vertical">
+
+            <LinearLayout
+                android:id="@+id/ll_orders"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+				android:paddingTop="5dp"
+				android:paddingLeft="10dp"
+				android:paddingRight="10dp"
+				android:paddingBottom="30dp">
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+
+
+
+
+    <LinearLayout
+        android:id="@+id/bottom_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="4"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/sendData"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/edit_background"
+				android:textSize="14sp"
+                android:hint="请输入十六进制数据" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/send"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/button_background"
+                android:text="发送"
+				android:gravity="center"
+				android:padding="8dp"
+                android:textColor="@android:color/white" />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+	<ScrollView
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="5">
+
+		<LinearLayout
+			android:id="@+id/ll_manage_dev"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical"
+			android:padding="5dp">
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:orientation="horizontal"
+				android:paddingLeft="@dimen/activity_horizontal_margin"
+				android:paddingRight="@dimen/activity_horizontal_margin">
+
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="3"
+					android:orientation="horizontal">
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="系统版本：" />
+
+					<TextView
+						android:id="@+id/tv_dev_version"
+						android:layout_width="0dp"
+						android:layout_weight="1"
+						android:layout_height="wrap_content"
+						android:hint="暂无数据"
+						android:paddingTop="5dp"
+						android:paddingBottom="5dp" />
+					<TextView
+						android:id="@+id/tv_err_code"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:textColor="@color/yellow"
+						android:paddingTop="5dp"
+						android:paddingBottom="5dp" />
+				</LinearLayout>
+				<TextView
+					android:id="@+id/tv_refresh"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:drawableLeft="@mipmap/ic_refresh_black"
+					android:paddingLeft="15dp"
+					android:paddingTop="5dp"
+					android:paddingRight="10dp"
+					android:paddingBottom="5dp"
+					android:text=" 刷新" />
+
+			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:orientation="horizontal"
+				android:paddingLeft="@dimen/activity_horizontal_margin">
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="3"
+					android:orientation="horizontal">
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="系统时间：" />
+
+					<TextView
+						android:id="@+id/tv_sys_time"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:hint="暂无数据"
+						android:paddingTop="5dp"
+						android:paddingBottom="5dp"
+						android:singleLine="true"
+						android:textSize="15sp"
+						android:textColor="@color/color_app_light"
+						/>
+				</LinearLayout>
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="2"
+					android:orientation="horizontal">
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="电源电压：" />
+
+					<TextView
+						android:id="@+id/tv_dev_ev"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:hint="暂无数据"
+						android:paddingTop="5dp"
+						android:paddingBottom="5dp" />
+
+				</LinearLayout>
+
+
+			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10dp"
+				android:layout_marginTop="5dp"
+				android:layout_marginRight="10dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="MAC地址：" />
+
+				<TextView
+					android:id="@+id/tv_mac_address"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:hint="暂无数据"
+					android:textColor="@color/color_app_light" />
+
+				<TextView
+					android:id="@+id/tv_set_mac_address"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:drawableLeft="@mipmap/ic_one_scan_black"
+					android:gravity="center"
+					android:padding="5dp"
+					android:text=" 扫码设置\n Mac地址"
+					android:textColor="@color/color_black_333333"
+					android:textSize="11sp" />
+
+			</LinearLayout>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:orientation="horizontal"
+
+				android:paddingLeft="@dimen/activity_horizontal_margin">
+
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="3"
+					android:orientation="horizontal">
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="工作模式：" />
+
+					<TextView
+						android:id="@+id/tv_dev_run_mode"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:hint="暂无数据"
+						android:paddingTop="5dp"
+						android:paddingBottom="5dp"
+						android:textColor="@color/color_app_light"/>
+				</LinearLayout>
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="2"
+					android:orientation="horizontal">
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="工作温度：" />
+
+					<TextView
+						android:id="@+id/tv_box_temperature"
+						android:layout_width="0dp"
+						android:layout_weight="1"
+						android:layout_height="wrap_content"
+						android:hint="暂无数据"
+						/>
+
+				</LinearLayout>
+
+			</LinearLayout>
+
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:orientation="horizontal"
+				android:layout_marginTop="5dp"
+				android:paddingLeft="@dimen/activity_horizontal_margin"
+				>
+
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="3"
+
+					android:orientation="horizontal">
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="物联网卡:" />
+
+					<TextView
+						android:id="@+id/tv_dev_icc_id"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:hint="暂无数据"
+						android:paddingTop="5dp"
+						android:paddingBottom="5dp" />
+				</LinearLayout>
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="2"
+					android:orientation="horizontal">
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="运行状态：" />
+
+					<TextView
+						android:id="@+id/tv_work_status"
+						android:layout_width="0dp"
+						android:layout_weight="1"
+						android:layout_height="wrap_content"
+						android:hint="暂无数据"
+						android:paddingTop="5dp"
+						android:paddingBottom="5dp" />
+
+				</LinearLayout>
+
+			</LinearLayout>
+
+			<View
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:layout_marginTop="5dp"
+				android:background="@color/colorSeparate" />
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10dp"
+				android:layout_marginTop="10dp"
+				android:layout_marginRight="10dp"
+				android:gravity="center_vertical"
+				android:orientation="vertical">
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal">
+					<RelativeLayout
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content">
+
+						<ImageView
+							android:id="@+id/iv_sample_bottle1"
+							android:layout_width="60dp"
+							android:layout_height="60dp"
+							android:layout_marginTop="5dp"
+							android:layout_marginRight="5dp"
+							android:layout_marginBottom="5dp"
+							android:src="@mipmap/ic_sample_bottle" />
+						<TextView
+							android:id="@+id/tv_sample_bottle_num1"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerInParent="true"
+							android:text="1"
+
+							android:textSize="18sp"
+							android:textColor="@color/color_black_000000"
+							android:paddingTop="7dp"
+							android:paddingRight="4dp"/>
+						<ImageView
+							android:id="@+id/iv_red_lock1"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:src="@mipmap/ic_red_lock"
+							android:layout_alignTop="@id/iv_sample_bottle1"
+							android:layout_alignRight="@id/iv_sample_bottle1"
+							android:visibility="gone"
+							/>
+					</RelativeLayout>
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="70dp"
+						android:orientation="vertical">
+						<LinearLayout
+							android:id="@+id/ll_bottle1_sample_no"
+							android:layout_width="match_parent"
+							android:layout_height="0dp"
+							android:layout_weight="1"
+							android:orientation="horizontal"
+							android:gravity="center_vertical">
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="样品编号：" />
+
+							<TextView
+								android:id="@+id/tv_bottle1_sample_no"
+								android:layout_width="0dp"
+								android:layout_height="match_parent"
+								android:layout_weight="1"
+								android:hint="请点击扫码录入"
+								android:paddingTop="1dp"
+								android:paddingBottom="1dp"
+								android:gravity="center_vertical"
+								android:textColor="@color/color_app_light"
+								/>
+							<ImageView
+								android:id="@+id/iv_scan_1"
+								android:layout_width="wrap_content"
+								android:layout_height="match_parent"
+								android:src="@mipmap/ic_one_scan_black"
+								/>
+						</LinearLayout>
+						<LinearLayout
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:orientation="horizontal">
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="已采体积：" />
+
+							<TextView
+								android:id="@+id/tv_bottle1_vol"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:layout_weight="1"
+								android:hint="暂无数据"
+								/>
+						</LinearLayout>
+						<LinearLayout
+							android:layout_width="match_parent"
+							android:layout_height="0dp"
+							android:layout_weight="1"
+							android:orientation="horizontal"
+							android:gravity="center_vertical">
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="采集比例：" />
+
+							<TextView
+								android:id="@+id/tv_bottle1_ratio"
+								android:layout_width="0dp"
+								android:layout_height="match_parent"
+								android:layout_weight="1"
+								android:hint="暂无数据"
+								android:paddingTop="1dp"
+								android:paddingBottom="1dp"
+								android:gravity="center_vertical"
+								android:textColor="@color/color_app_light"
+								/>
+						</LinearLayout>
+
+					</LinearLayout>
+				</LinearLayout>
+
+			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10dp"
+				android:layout_marginTop="10dp"
+				android:layout_marginRight="10dp"
+				android:gravity="center_vertical"
+				android:orientation="vertical">
+				<LinearLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:orientation="horizontal">
+					<RelativeLayout
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content">
+						<ImageView
+							android:id="@+id/iv_sample_bottle2"
+							android:layout_width="60dp"
+							android:layout_height="60dp"
+							android:src="@mipmap/ic_sample_bottle"
+							android:layout_marginTop="5dp"
+							android:layout_marginRight="5dp"
+							android:layout_marginBottom="5dp"
+							/>
+						<TextView
+							android:id="@+id/tv_sample_bottle_num2"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_centerInParent="true"
+							android:text="2"
+							android:textSize="18sp"
+							android:textColor="@color/color_black_000000"
+							android:paddingTop="7dp"
+							android:paddingRight="4dp"/>
+						<ImageView
+							android:id="@+id/iv_red_lock2"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:src="@mipmap/ic_red_lock"
+							android:layout_alignTop="@id/iv_sample_bottle2"
+							android:layout_alignRight="@id/iv_sample_bottle2"
+							android:visibility="gone"
+							/>
+					</RelativeLayout>
+					<LinearLayout
+						android:layout_width="match_parent"
+						android:layout_height="70dp"
+						android:orientation="vertical">
+						<LinearLayout
+							android:id="@+id/ll_bottle2_sample_no"
+							android:layout_width="match_parent"
+							android:layout_height="0dp"
+							android:layout_weight="1"
+							android:orientation="horizontal"
+							android:gravity="center_vertical">
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="样品编号：" />
+
+							<TextView
+								android:id="@+id/tv_bottle2_sample_no"
+								android:layout_width="0dp"
+								android:layout_height="match_parent"
+								android:layout_weight="1"
+								android:hint="请点击扫码录入"
+								android:paddingTop="1dp"
+								android:paddingBottom="1dp"
+								android:gravity="center_vertical"
+								android:textColor="@color/color_app_light"
+								/>
+							<ImageView
+								android:id="@+id/iv_scan_2"
+								android:layout_width="wrap_content"
+								android:layout_height="match_parent"
+								android:src="@mipmap/ic_one_scan_black"
+								/>
+						</LinearLayout>
+						<LinearLayout
+							android:layout_width="match_parent"
+							android:layout_height="wrap_content"
+							android:orientation="horizontal">
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="已采体积：" />
+
+							<TextView
+								android:id="@+id/tv_bottle2_vol"
+								android:layout_width="0dp"
+								android:layout_height="wrap_content"
+								android:layout_weight="1"
+								android:hint="暂无数据"
+								/>
+						</LinearLayout>
+						<LinearLayout
+							android:layout_width="match_parent"
+							android:layout_height="0dp"
+							android:layout_weight="1"
+							android:orientation="horizontal"
+							android:gravity="center_vertical">
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:text="采集比例：" />
+
+							<TextView
+								android:id="@+id/tv_bottle2_ratio"
+								android:layout_width="0dp"
+								android:layout_height="match_parent"
+								android:layout_weight="1"
+								android:hint="暂无数据"
+								android:paddingTop="1dp"
+								android:paddingBottom="1dp"
+								android:gravity="center_vertical"
+								android:textColor="@color/color_app_light"
+								/>
+						</LinearLayout>
+
+					</LinearLayout>
+				</LinearLayout>
+
+			</LinearLayout>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:orientation="horizontal"
+				android:layout_marginTop="5dp"
+				android:paddingLeft="@dimen/activity_horizontal_margin"
+				>
+
+				<LinearLayout
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="3"
+
+					android:orientation="horizontal">
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="采样时间：" />
+
+					<TextView
+						android:id="@+id/tv_sample_time"
+						android:layout_width="0dp"
+						android:layout_height="wrap_content"
+						android:layout_weight="1"
+						android:hint="暂无数据"
+						android:paddingTop="5dp"
+						android:paddingBottom="5dp" />
+				</LinearLayout>
+
+
+			</LinearLayout>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:orientation="horizontal"
+				android:layout_marginTop="10dp"
+				android:layout_marginLeft="@dimen/activity_horizontal_margin"
+				android:layout_marginRight="@dimen/activity_horizontal_margin">
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="实时流量：" />
+
+				<TextView
+					android:id="@+id/tv_current_flow"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:hint="暂无数据"
+					/>
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="超时时间:" />
+
+				<TextView
+					android:id="@+id/tv_sample_max_time"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:hint="暂无数据"
+					android:textColor="@color/color_app_light" />
+
+
+
+
+			</LinearLayout>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10dp"
+				android:layout_marginTop="15dp"
+				android:layout_marginRight="10dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="间隔流量：" />
+
+				<TextView
+					android:id="@+id/tv_space_flow"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:hint="暂无数据"
+					/>
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="最小触发流量：" />
+
+				<TextView
+					android:id="@+id/tv_min_flow"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:hint="暂无数据"
+					android:textColor="@color/color_app_light" />
+
+
+			</LinearLayout>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10dp"
+				android:layout_marginTop="15dp"
+				android:layout_marginRight="10dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="累计流量：" />
+
+				<TextView
+					android:id="@+id/tv_total_flow"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:hint="暂无数据"
+					/>
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="最小采集量：" />
+
+				<TextView
+					android:id="@+id/tv_min_sample_vol"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:hint="暂无数据"
+					android:textColor="@color/color_app_light" />
+
+
+
+
+			</LinearLayout>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10dp"
+				android:layout_marginTop="15dp"
+				android:layout_marginRight="10dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="手动模式电机1转速：" />
+
+				<TextView
+					android:id="@+id/tv_sudu1"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:hint="暂无"
+					android:textColor="@color/color_app_light"
+					/>
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="手动模式电机2转速：" />
+
+				<TextView
+					android:id="@+id/tv_sudu2"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:layout_weight="1"
+					android:hint="暂无"
+					android:textColor="@color/color_app_light"
+					/>
+			</LinearLayout>
+
+			<View
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:layout_marginTop="10dp"
+				android:background="@color/colorSeparate" />
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10dp"
+				android:layout_marginTop="10dp"
+				android:layout_marginRight="10dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+
+
+				<TextView
+					android:id="@+id/tv_bottle_clear"
+					android:layout_width="0dp"
+					android:layout_weight="1"
+					android:gravity="center"
+					android:layout_height="wrap_content"
+					android:layout_alignParentRight="true"
+					android:layout_centerVertical="true"
+					android:layout_marginLeft="20dp"
+					android:background="@drawable/shape_background_app_color_radiu_10dp"
+					android:padding="8dp"
+					android:text="换瓶清空"
+					android:textColor="@color/white"
+					android:textSize="12sp" />
+
+				<TextView
+					android:id="@+id/tv_clear_reset"
+					android:layout_width="0dp"
+					android:layout_weight="1"
+					android:gravity="center"
+					android:layout_height="wrap_content"
+					android:layout_alignParentRight="true"
+					android:layout_centerVertical="true"
+					android:layout_marginLeft="20dp"
+					android:background="@drawable/shape_background_app_color_radiu_10dp"
+					android:padding="8dp"
+					android:text="复 位"
+					android:textColor="@color/white"
+					android:textSize="12sp" />
+
+				<TextView
+					android:id="@+id/tv_open_door"
+					android:layout_width="0dp"
+					android:layout_weight="1"
+					android:gravity="center"
+					android:layout_height="wrap_content"
+					android:layout_alignParentRight="true"
+					android:layout_centerVertical="true"
+					android:layout_marginLeft="20dp"
+					android:background="@drawable/shape_background_app_color_radiu_10dp"
+					android:padding="8dp"
+					android:text="打开门锁"
+					android:textColor="@color/white"
+					android:textSize="12sp" />
+
+			</LinearLayout>
+			<View
+				android:layout_width="match_parent"
+				android:layout_height="1dp"
+				android:layout_marginTop="10dp"
+				android:background="@color/colorSeparate" />
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="10dp"
+				android:layout_marginTop="10dp"
+				android:layout_marginRight="10dp"
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
+
+
+				<TextView
+					android:id="@+id/tv_sample_start"
+					android:layout_width="0dp"
+					android:layout_weight="1"
+					android:gravity="center"
+					android:layout_height="wrap_content"
+					android:layout_alignParentRight="true"
+					android:layout_centerVertical="true"
+					android:layout_marginLeft="20dp"
+					android:background="@drawable/shape_background_green_radiu_10dp"
+					android:padding="8dp"
+					android:text="开 启 采 样"
+					android:textColor="@color/white"
+					android:textSize="12sp" />
+
+				<TextView
+					android:id="@+id/tv_sample_stop"
+					android:layout_width="0dp"
+					android:layout_weight="1"
+					android:gravity="center"
+					android:layout_height="wrap_content"
+					android:layout_alignParentRight="true"
+					android:layout_centerVertical="true"
+					android:layout_marginLeft="20dp"
+					android:background="@drawable/shape_background_orange_radiu_10dp"
+					android:padding="8dp"
+					android:text="停 止 采 样"
+					android:textColor="@color/white"
+					android:textSize="12sp" />
+
+			</LinearLayout>
+
+
+		</LinearLayout>
+	</ScrollView>
+
+
+</LinearLayout>

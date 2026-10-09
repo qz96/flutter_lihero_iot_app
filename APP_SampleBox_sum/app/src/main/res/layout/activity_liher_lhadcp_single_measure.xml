@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- 滚动内容区 -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="15dp">
+
+            <!-- 运行模式设置 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="运行模式"
+                android:textColor="#333333"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="10dp" />
+
+            <RadioGroup
+                android:id="@+id/rg_run_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_background_white_radiu_10dp"
+                android:padding="15dp">
+
+                <RadioButton
+                    android:id="@+id/rb_auto_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="自动模式"
+                    android:textSize="14sp"
+                    android:padding="10dp" />
+
+                <RadioButton
+                    android:id="@+id/rb_manual_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="手动模式"
+                    android:textSize="14sp"
+                    android:padding="10dp" />
+
+                <RadioButton
+                    android:id="@+id/rb_online_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="在线模式"
+                    android:textSize="14sp"
+                    android:padding="10dp" />
+
+                <RadioButton
+                    android:id="@+id/rb_maintenance_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="维护模式"
+                    android:textSize="14sp"
+                    android:padding="10dp" />
+            </RadioGroup>
+
+            <!-- 自动模式配置 -->
+            <LinearLayout
+                android:id="@+id/ll_auto_config"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="15dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="自动测试持续时间（秒）"
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="5dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/tv_auto_time"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="45dp"
+                        android:background="@drawable/edit_background"
+                        android:inputType="number"
+                        android:padding="10dp"
+                        android:textSize="14sp" />
+                    <TextView
+                        android:id="@+id/tv_auto_start"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="45dp"
+                        android:background="@drawable/shape_background_app_color_radiu_5dp"
+                        android:layout_marginLeft="20dp"
+                        android:padding="10dp"
+                        android:textSize="14sp"
+                        android:text="开始测量"
+                        android:gravity="center"
+                        android:textColor="@color/white"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- 手动模式控制按钮 -->
+            <LinearLayout
+                android:id="@+id/ll_manual_control"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="15dp"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/btn_start_measure"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="5dp"
+                    android:background="@drawable/shape_background_green_color_radiu_15dp"
+                    android:text="开始测量"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp" />
+
+                <Button
+                    android:id="@+id/btn_stop_measure"
+                    android:layout_width="0dp"
+                    android:layout_height="45dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="5dp"
+                    android:background="@drawable/shape_background_gray_color_radiu_15dp"
+                    android:enabled="false"
+                    android:text="结束测量"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- 计时器显示 -->
+            <TextView
+                android:id="@+id/tv_timer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/shape_background_app_color_radiu_10dp"
+                android:gravity="center"
+                android:padding="15dp"
+                android:text="00:00:00"
+                android:textColor="#333333"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <!-- 在线模式配置 -->
+            <LinearLayout
+                android:id="@+id/ll_online_config"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="15dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="采样等待时间（秒）"
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="5dp" />
+
+                <TextView
+                    android:id="@+id/et_sam_wait"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="@drawable/edit_background"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:textSize="14sp"
+                    android:hint="点击输入"
+                    android:textColorHint="#999999"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="采数间隔时间（分钟）"
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="5dp" />
+
+                <TextView
+                    android:id="@+id/et_sam_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="@drawable/edit_background"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:textSize="14sp"
+                    android:hint="点击输入"
+                    android:textColorHint="#999999"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="上传间隔时间（分钟）"
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="5dp" />
+
+                <TextView
+                    android:id="@+id/et_up_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="@drawable/edit_background"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:textSize="14sp"
+                    android:hint="点击输入"
+                    android:textColorHint="#999999"
+                    android:layout_marginBottom="10dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="首次测试时间"
+                    android:textColor="#333333"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="5dp" />
+
+                <TextView
+                    android:id="@+id/et_start_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="@drawable/edit_background"
+                    android:gravity="center_vertical"
+                    android:hint="点击选择日期时间"
+                    android:padding="10dp"
+                    android:textSize="14sp"
+                    android:textColorHint="#999999" />
+            </LinearLayout>
+
+            <!-- 实时数据查看按钮（在线模式） -->
+            <Button
+                android:id="@+id/btn_view_realtime_data"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/shape_background_blue_55_radiu_5dp"
+                android:text="实时数据查看"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <!-- 参数设置区域 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="测量参数设置"
+                android:textColor="#333333"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/shape_background_white_radiu_10dp"
+                android:padding="15dp">
+
+                <!-- 测量人员 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="测量人员"
+                    android:textColor="#666666"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/et_operator_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="@drawable/edit_background"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:padding="10dp"
+                    android:textSize="14sp" />
+
+                <!-- 断面MN -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="断面MN"
+                    android:textColor="#666666"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/et_section_mn"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:background="@drawable/edit_background"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:maxLength="12"
+                    android:padding="10dp"
+                    android:textSize="14sp" />
+
+                <!-- 河底高程、安装高度、安装方向已移至参数设置页面 -->
+
+                <!-- 曲线系数ABC已移至参数设置页面 -->
+
+                <!-- 断面形状选择 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="断面形状"
+                    android:textColor="#666666"
+                    android:textSize="13sp" />
+
+                <Spinner
+                    android:id="@+id/spinner_section_shape"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/edit_background" />
+
+                <!-- 断面参数 -->
+                <LinearLayout
+                    android:id="@+id/ll_section_params"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_param1_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="宽度（m）"
+                        android:textColor="#666666"
+                        android:textSize="13sp" />
+
+                    <EditText
+                        android:id="@+id/et_section_param1"
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:background="@drawable/edit_background"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:inputType="numberDecimal"
+                        android:padding="10dp"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tv_param2_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="参数2（m）"
+                        android:textColor="#666666"
+                        android:textSize="13sp"
+                        android:visibility="gone" />
+
+                    <EditText
+                        android:id="@+id/et_section_param2"
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:background="@drawable/edit_background"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:inputType="numberDecimal"
+                        android:padding="10dp"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/tv_param3_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="参数3（m）"
+                        android:textColor="#666666"
+                        android:textSize="13sp"
+                        android:visibility="gone" />
+
+                    <EditText
+                        android:id="@+id/et_section_param3"
+                        android:layout_width="match_parent"
+                        android:layout_height="45dp"
+                        android:background="@drawable/edit_background"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="10dp"
+                        android:inputType="numberDecimal"
+                        android:padding="10dp"
+                        android:textSize="14sp"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- 
+                注意：根据需求文档2.3节，第7个参数“淤积厚度”为预留字段
+                用于设置过水断面淤泥厚度，对过水断面面积进行修正
+                当前暂无数据，暂不实现UI
+            -->
+
+            <!-- 保存参数按钮 -->
+            <Button
+                android:id="@+id/btn_save_params"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/shape_background_green_color_radiu_15dp"
+                android:text="保存参数"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

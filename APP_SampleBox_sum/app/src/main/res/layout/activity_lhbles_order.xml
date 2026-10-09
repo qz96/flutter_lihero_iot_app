@@ -1,0 +1,96 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="蓝牙升级程序："
+                android:textSize="14sp"
+                />
+            <EditText
+                android:id="@+id/ed_ble_bin"
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:layout_height="wrap_content"
+                android:hint="请录入蓝牙指令内容"
+                android:textColorHint="@color/color_black_999999"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/color_app_light"
+                android:background="@null"
+                />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/srl_sample_bottles"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="visible"
+        android:layout_marginTop="2dp">
+
+        <ListView
+            android:id="@+id/lv_lh_ble_dev"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            tools:listitem="@layout/item_sample_bottle_state"
+            android:divider="@color/transparent"
+            android:dividerHeight="0dp"/>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp">
+        <Button
+            android:id="@+id/bt_upgrade_all"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="开始蓝牙批量指令"
+            android:textColor="@color/color_white_ffffff"
+            android:textSize="14sp"
+            android:background="@drawable/shape_background_green_radiu_10dp"
+            />
+
+
+
+        <Button
+            android:id="@+id/bt_upgrade_residue"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:text="重试失败指令"
+            android:textColor="@color/color_white_ffffff"
+            android:textSize="14sp"
+            android:background="@drawable/shape_background_app_color_radiu_10dp"
+            android:visibility="gone"
+            />
+    </LinearLayout>
+</LinearLayout>
