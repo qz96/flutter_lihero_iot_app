@@ -9,6 +9,843 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'package:thingsboard_app/config/themes/app_colors.dart';
+import 'package:thingsboard_app/config/themes/rtu_theme.dart';
+
+// ============================================================================
+// 调色板：统一走 config/themes/app_colors.dart 的 RTU 段，
+// 圆角走 RtuTokens，避免在本文件重复定义色值。
+// ============================================================================
+class _R {
+  static const bg = AppColors.rtuBg;
+  static const surface = AppColors.rtuSurface;
+  static const surface2 = AppColors.rtuSurface2;
+  static const surface3 = AppColors.rtuSurface3;
+  static const text = AppColors.rtuText;
+  static const text2 = AppColors.rtuText2;
+  static const text3 = AppColors.rtuText3;
+  static const line = AppColors.rtuLine;
+  static const line2 = AppColors.rtuLine2;
+  static const brand = AppColors.rtuBrand;
+  static const brandD = AppColors.rtuBrandD;
+  static const brandL = AppColors.rtuBrandL;
+  static const cyan = AppColors.rtuCyan;
+  static const ok = AppColors.rtuOk;
+  static const okL = AppColors.rtuOkL;
+  static const warn = AppColors.rtuWarn;
+  static const err = AppColors.rtuErr;
+  static const errL = AppColors.rtuErrL;
+}
+
+// ============================================================================
+// Bottom tab bar —— 首页底部导航
+//
+// 四个 tab 对应新版首页设计：概览 / 监测 / 数据 / 设置。
+// 纯展示组件，选中态与点击回调由 `_RtuPageState` 注入，不含任何业务逻辑。
+// ============================================================================
+enum _RtuTab { overview, monitor, data, settings }
+
+extension _RtuTabX on _RtuTab {
+  String get label => switch (this) {
+    _RtuTab.overview => '概览',
+    _RtuTab.monitor => '监测',
+    _RtuTab.data => '数据',
+    _RtuTab.settings => '设置',
+  };
+
+  /// 复用本文件已有的 SVG 图标集（`_Icons.svg`）。
+  String get iconName => switch (this) {
+    _RtuTab.overview => 'home',
+    _RtuTab.monitor => 'gauge',
+    _RtuTab.data => 'chart',
+    _RtuTab.settings => 'cog',
+  };
+}
+
+/// 底部导航条：白底、顶部细分割线、选中项使用品牌蓝。
+class _RtuTabBar extends StatelessWidget {
+  const _RtuTabBar({required this.current, required this.onChanged});
+
+  final _RtuTab current;
+  final ValueChanged<_RtuTab> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: _R.surface,
+        border: Border(top: BorderSide(color: _R.line)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 58,
+          child: Row(
+            children: [
+              for (final tab in _RtuTab.values)
+                Expanded(
+                  child: InkWell(
+                    onTap: () => onChanged(tab),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _Icons.svg(
+                          tab.iconName,
+                          size: 21,
+                          color: tab == current ? _R.brand : _R.text3,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          tab.label,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight:
+                                tab == current ? FontWeight.w600 : FontWeight.w400,
+                            color: tab == current ? _R.brand : _R.text3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// 概览页小组件
+// ============================================================================
+
+/// 圆角图标块：用于「快捷操作」四宫格与列表行左侧图标。
+class _IconTile extends StatelessWidget {
+  const _IconTile({
+    required this.icon,
+    required this.fg,
+    required this.bg,
+    this.size = RtuTokens.iconTileNav,
+  });
+
+  final IconData icon;
+  final Color fg;
+  final Color bg;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(RtuTokens.radiusIconTile),
+      ),
+      child: Icon(icon, size: size * 0.55, color: fg),
+    );
+  }
+}
+
+/// 头部区：页面标题 + 副标题 + 右侧状态胶囊。
+class _RtuPageHeader extends StatelessWidget {
+  const _RtuPageHeader({
+    required this.title,
+    required this.subtitle,
+    required this.chip,
+  });
+
+  final String title;
+  final String subtitle;
+  final Widget chip;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        RtuTokens.pageInset,
+        8,
+        RtuTokens.pageInset,
+        12,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: RtuTextStyles.pageTitle.copyWith(fontSize: 21),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: RtuTextStyles.pageSubtitle.copyWith(
+                    fontSize: 12,
+                    color: _R.text2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          chip,
+        ],
+      ),
+    );
+  }
+}
+
+/// 药丸形状态标签（通信正常 / 在线 / 已连接 等）。
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.text, required this.fg, required this.bg});
+
+  final String text;
+  final Color fg;
+  final Color bg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(RtuTokens.radiusChip),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: RtuTokens.statusDot,
+            height: RtuTokens.statusDot,
+            decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+              color: fg,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 迷你折线图（实时数据卡片内的趋势线）。
+/// 无真实历史数据时绘制一条平缓的示意曲线，仅为视觉呈现。
+class _SparkLine extends StatelessWidget {
+  const _SparkLine({required this.color, this.points});
+
+  final Color color;
+  final List<double>? points;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: RtuTokens.sparkHeight,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: _SparkPainter(color, points ?? const [0.5, 0.45, 0.6, 0.4, 0.55, 0.5, 0.62, 0.5]),
+      ),
+    );
+  }
+}
+
+class _SparkPainter extends CustomPainter {
+  _SparkPainter(this.color, this.points);
+
+  final Color color;
+  final List<double> points;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (points.length < 2) return;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.8
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final dx = size.width / (points.length - 1);
+    final path = Path();
+    for (var i = 0; i < points.length; i++) {
+      // points 为 0~1 的纵向比例，0 在顶部，映射到画布时按可用高度缩放。
+      final y = points[i].clamp(0.0, 1.0) * size.height;
+      if (i == 0) {
+        path.moveTo(0, y);
+      } else {
+        path.lineTo(dx * i, y);
+      }
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SparkPainter old) =>
+      old.color != color || old.points != points;
+}
+
+/// 概览页「平台连接状态」卡片的一行：左侧说明 + 右侧值（可带颜色）。
+///
+/// 只做展示，数值全部来自页面已有的 `basic` / `lot` 字段。
+class _KvRow extends StatelessWidget {
+  const _KvRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.icon,
+    this.last = false,
+  });
+
+  final String label;
+  final String value;
+  final Color? valueColor;
+  final IconData? icon;
+  final bool last;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10.5),
+      decoration: last
+          ? null
+          : const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: AppColors.rtuLine2),
+              ),
+            ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: RtuTextStyles.keyValue.copyWith(color: _R.text2),
+            ),
+          ),
+          if (icon != null) ...[
+            const SizedBox(width: RtuTokens.gapSm),
+            Icon(icon, size: 17, color: valueColor ?? _R.text),
+          ],
+          if (icon != null) const SizedBox(width: 3),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: RtuTextStyles.keyValueStrong.copyWith(
+                color: valueColor ?? _R.text,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 概览页「断面与下端设备」卡片的一行。
+///
+/// 字段与蓝牙页设备行同源（`_devices` 里的 `name` / `address` / `rssi`），
+/// 不新增数据来源；无设备时展示占位行。
+class _DeviceRow extends StatelessWidget {
+  const _DeviceRow({
+    required this.title,
+    required this.subtitle,
+    required this.connected,
+    this.last = false,
+  });
+
+  final String title;
+  final String subtitle;
+  final bool connected;
+  final bool last;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = connected ? _R.ok : _R.text3;
+    final bg = connected ? _R.okL : RtuTokens.barTrack;
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: RtuTokens.rowPaddingSm),
+      decoration: last
+          ? null
+          : const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: AppColors.rtuLine2),
+              ),
+            ),
+      child: Row(
+        children: [
+          Container(
+            width: 9,
+            height: 9,
+            decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: RtuTokens.gapXxl),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: RtuTextStyles.rowTitle.copyWith(color: _R.text),
+                ),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: RtuTextStyles.rowSubtitle.copyWith(
+                      color: _R.text3,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: RtuTokens.gapMd),
+          _StatusPill(text: connected ? '已连接' : '未连接', fg: fg, bg: bg),
+        ],
+      ),
+    );
+  }
+}
+
+/// 概览页的断面示意图（梯形断面，按 CSS 绘制的静态剖面图）。
+///
+/// 数值全部来自页面已有的遥测字段：水位 / 空高 / 表面流速，
+/// 以及流量计基础配置里的断面参数（底宽 / 边坡 / 淤积厚度）。
+class _SectionDiagram extends StatelessWidget {
+  const _SectionDiagram({
+    required this.height,
+    required this.waterLevel,
+    required this.velocity,
+    required this.bottomWidth,
+    required this.slope,
+    required this.thickness,
+  });
+
+  final double height;
+  final double waterLevel;
+  final double velocity;
+  final double bottomWidth;
+  final double slope;
+  final double thickness;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: CustomPaint(
+        painter: _SectionPainter(
+          waterRatio: waterLevel > 0 ? (waterLevel / height) : 0,
+          thicknessRatio: thickness > 0 ? (thickness / height) : 0,
+          velocity: velocity,
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionPainter extends CustomPainter {
+  _SectionPainter({
+    required this.waterRatio,
+    required this.thicknessRatio,
+    required this.velocity,
+  });
+
+  final double waterRatio;
+  final double thicknessRatio;
+  final double velocity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const pad = 6.0;
+    final cx = size.width / 2;
+    final topY = pad;
+    final bottomY = size.height - pad;
+    final waterY = bottomY - (bottomY - topY) * waterRatio.clamp(0.0, 1.0);
+    // 梯形：上宽下窄，底宽固定占画布 62%，边坡影响上口宽度（示意）。
+    final bottomHalf = size.width * 0.31;
+    final topHalf = (bottomHalf + (bottomY - topY) * 0.62).clamp(
+      0.0,
+      size.width / 2,
+    );
+
+    final section = Path()
+      ..moveTo(cx - topHalf, topY)
+      ..lineTo(cx + topHalf, topY)
+      ..lineTo(cx + bottomHalf, bottomY)
+      ..lineTo(cx - bottomHalf, bottomY)
+      ..close();
+
+    // 断面底色
+    canvas.drawPath(
+      section,
+      Paint()..color = const Color(0xFFE9EFF7),
+    );
+
+    // 水体（水位以下部分）
+    canvas.save();
+    canvas.clipPath(section);
+    final waterTop = waterY.clamp(topY, bottomY);
+    canvas.drawRect(
+      Rect.fromLTRB(0, waterTop, size.width, bottomY),
+      Paint()..color = AppColors.rtuBrand.withValues(alpha: 0.26),
+    );
+    if (thicknessRatio > 0) {
+      final depositY =
+          bottomY - (bottomY - topY) * thicknessRatio.clamp(0.0, 1.0);
+      canvas.drawRect(
+        Rect.fromLTRB(0, depositY, size.width, bottomY),
+        Paint()..color = const Color(0xFFBFC9D6),
+      );
+    }
+    canvas.restore();
+
+    // 断面轮廓
+    canvas.drawPath(
+      section,
+      Paint()
+        ..color = AppColors.rtuLine2
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
+    );
+    // 水面线
+    canvas.drawLine(
+      Offset(cx - topHalf, waterTop),
+      Offset(cx + topHalf, waterTop),
+      Paint()
+        ..color = AppColors.rtuBrand
+        ..strokeWidth = 1.6,
+    );
+    // 中线（虚线示意探头到水面的距离）
+    _dashLine(
+      canvas,
+      Offset(cx, topY),
+      Offset(cx, waterTop),
+      const Color(0xFF93A1B3),
+    );
+  }
+
+  void _dashLine(Canvas canvas, Offset from, Offset to, Color color) {
+    const dash = 4.0;
+    const gap = 3.0;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
+    var y = from.dy;
+    while (y < to.dy) {
+      canvas.drawLine(
+        Offset(from.dx, y),
+        Offset(from.dx, (y + dash).clamp(0.0, to.dy)),
+        paint,
+      );
+      y += dash + gap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SectionPainter old) =>
+      old.waterRatio != waterRatio ||
+      old.thicknessRatio != thicknessRatio ||
+      old.velocity != velocity;
+}
+
+// ============================================================================
+// SVG icon paths (from HTML data-ic attributes)
+// ============================================================================
+class _Icons {
+  static const _bt = '<path d="M7 7l10 10M17 7L7 17"/><path d="M7 12V7l5 5-5 5v-5z"/><path d="M12 2v20"/>';
+  static const _battery = '<rect x="2" y="7" width="17" height="10" rx="3"/><path d="M22 11v2"/><rect x="5" y="10" width="9" height="4" rx="1"/>';
+  static const _rtu = '<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h5"/><circle cx="16" cy="16.5" r="1.6"/>';
+  static const _chev = '<path d="M9 6l6 6-6 6"/>';
+  static const _back = '<path d="M15 6l-6 6 6 6"/>';
+  static const _check = '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.6 2.6L16 9.5"/>';
+  static const _info = '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.6"/>';
+  static const _scan = '<path d="M3 8V5.5A2.5 2.5 0 015.5 3H8M16 3h2.5A2.5 2.5 0 0121 5.5V8M21 16v2.5A2.5 2.5 0 0118.5 21H16M8 21H5.5A2.5 2.5 0 013 18.5V16"/><path d="M3.5 12h17"/>';
+  static const _upload = '<path d="M12 16V4M12 4l-4.2 4.2M12 4l4.2 4.2"/><path d="M4 16v2.5A1.5 1.5 0 005.5 20h13a1.5 1.5 0 001.5-1.5V16"/>';
+  static const _cloud = '<path d="M7 18a4 4 0 01-.4-8 5.5 5.5 0 0110.6 1.2A3.5 3.5 0 0117 18H7z"/><path d="M12 12v5M12 12l-2 2M12 12l2 2"/>';
+  static const _download = '<path d="M12 4v12M12 16l-4.2-4.2M12 16l4.2-4.2"/><path d="M4 18v1.5A1.5 1.5 0 005.5 21h13a1.5 1.5 0 001.5-1.5V18"/>';
+  static const _play = '<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5L10 15.5z"/>';
+  static const _pause = '<circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/>';
+  static const _refresh = '<path d="M20 12a8 8 0 11-2.6-5.9"/><path d="M20 4v4.5h-4.5"/>';
+  static const _clock = '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>';
+  static const _plug = '<path d="M9 3v5M15 3v5"/><path d="M6 8h12v2.5a6 6 0 01-6 6 6 6 0 01-6-6V8z"/><path d="M12 16.5V21"/>';
+  static const _ruler = '<path d="M3 15.5L15.5 3l5.5 5.5L8.5 21z"/><path d="M7.5 11.5l2 2M10.5 8.5l2 2M13.5 5.5l2 2"/>';
+  static const _curve = '<path d="M3 19c4 0 4-12 8-12s4 8 8 8"/><circle cx="11" cy="7" r="1.6"/><circle cx="19" cy="15" r="1.6"/>';
+  static const _bell = '<path d="M18 9a6 6 0 10-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M10.5 20a2 2 0 003 0"/>';
+  static const _tool = '<path d="M14.5 5.5a4 4 0 105.2 5.2L21 12l-9 9-3-3 9-9z"/><path d="M6.5 3.5L4 6l3 3 2.5-2.5z"/>';
+  static const _home = '<path d="M4 10.5L12 4l8 6.5V19a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 19v-8.5z"/><path d="M9.5 20.5V14h5v6.5"/>';
+  static const _gauge = '<circle cx="12" cy="13" r="8"/><path d="M12 13l4-3.5"/><path d="M4.5 20.5h15"/>';
+  static const _chart = '<path d="M4 20V4"/><path d="M4 20h16"/><path d="M7.5 16l3.5-5 3 3 5-7"/>';
+  static const _cog = '<circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7M7.3 16.7l-1.7 1.7"/>';
+  static const _flask = '<path d="M9 3h6M10 3v6l-4.5 9A1.5 1.5 0 006.9 20h10.2a1.5 1.5 0 001.4-2L14 9V3"/><path d="M7.5 14h9"/>';
+  static const _code = '<path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/>';
+  static const _wifi = '<path d="M4.5 9.5a11 11 0 0115 0M8 13a6.5 6.5 0 018 0"/><circle cx="12" cy="17.5" r="1.4"/>';
+  static const _power = '<path d="M12 3v8"/><path d="M6.8 6.8a7.5 7.5 0 1010.4 0"/>';
+  static const _reset = '<path d="M4.5 12a7.5 7.5 0 102.6-5.7"/><path d="M4 5v4.5h4.5"/>';
+
+  static const _all = <String, String>{
+    'bt': _bt, 'battery': _battery, 'rtu': _rtu, 'chev': _chev, 'back': _back,
+    'check': _check, 'info': _info, 'scan': _scan, 'upload': _upload,
+    'cloud': _cloud, 'download': _download, 'play': _play, 'pause': _pause,
+    'refresh': _refresh, 'clock': _clock, 'plug': _plug, 'ruler': _ruler,
+    'curve': _curve, 'bell': _bell, 'tool': _tool, 'home': _home,
+    'gauge': _gauge, 'chart': _chart, 'cog': _cog, 'flask': _flask,
+    'code': _code, 'wifi': _wifi, 'power': _power, 'reset': _reset,
+  };
+
+  static Widget svg(String name, {double size = 16, Color? color}) {
+    final path = _all[name];
+    if (path == null) return SizedBox.shrink();
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _SvgPainter(path, color ?? _R.text),
+        size: Size(size, size),
+      ),
+    );
+  }
+}
+
+class _SvgPainter extends CustomPainter {
+  final String svgPath;
+  final Color color;
+
+  _SvgPainter(this.svgPath, this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.6
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final scale = size.width / 24;
+    canvas.save();
+    canvas.scale(scale, scale);
+    _drawSvg(canvas, svgPath, paint);
+    canvas.restore();
+  }
+
+  void _drawSvg(Canvas canvas, String path, Paint paint) {
+    // Simple SVG path parser for our icon paths
+    final fillPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // Split by path tags
+    final paths = <_SvgPathDef>[];
+    final re = RegExp(r'<(path|circle|rect|polyline|polygon|line)([^>]*)>');
+    for (final m in re.allMatches(path)) {
+      final tag = m.group(1)!;
+      final attrs = m.group(2)!;
+      final fill = RegExp(r'fill="([^"]*)"').firstMatch(attrs)?.group(1);
+      final stroke = RegExp(r'stroke="([^"]*)"').firstMatch(attrs)?.group(1);
+      paths.add(_SvgPathDef(tag, attrs, fill, stroke));
+    }
+
+    for (final def in paths) {
+      final p = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.6
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
+
+      if (def.fill == 'currentColor' || def.stroke == 'currentColor') {
+        p.color = color;
+      } else {
+        p.color = color;
+      }
+
+      switch (def.tag) {
+        case 'path':
+          final d = RegExp(r'd="([^"]*)"').firstMatch(def.attrs)?.group(1) ?? '';
+          _drawPath(canvas, d, p, def.fill == 'currentColor' ? fillPaint : null);
+          break;
+        case 'circle':
+          final cx = _num(def.attrs, 'cx');
+          final cy = _num(def.attrs, 'cy');
+          final r = _num(def.attrs, 'r');
+          if (def.fill == 'currentColor') {
+            canvas.drawCircle(Offset(cx, cy), r, fillPaint..style = PaintingStyle.fill);
+          } else {
+            canvas.drawCircle(Offset(cx, cy), r, p);
+          }
+          break;
+        case 'rect':
+          final x = _num(def.attrs, 'x');
+          final y = _num(def.attrs, 'y');
+          final w = _num(def.attrs, 'width');
+          final h = _num(def.attrs, 'height');
+          final rx = _num(def.attrs, 'rx');
+          final rrect = RRect.fromRectAndRadius(Rect.fromLTWH(x, y, w, h), Radius.circular(rx));
+          if (def.fill == 'currentColor') {
+            canvas.drawRRect(rrect, fillPaint..style = PaintingStyle.fill);
+          } else {
+            canvas.drawRRect(rrect, p);
+          }
+          break;
+        case 'line':
+          final x1 = _num(def.attrs, 'x1'), y1 = _num(def.attrs, 'y1');
+          final x2 = _num(def.attrs, 'x2'), y2 = _num(def.attrs, 'y2');
+          canvas.drawLine(Offset(x1, y1), Offset(x2, y2), p);
+          break;
+        case 'polyline':
+        case 'polygon':
+          final pts = RegExp(r'points="([^"]*)"').firstMatch(def.attrs)?.group(1) ?? '';
+          final pathObj = Path();
+          final parts = pts.split(RegExp(r'\s+'));
+          for (var i = 0; i < parts.length; i++) {
+            final xy = parts[i].split(',');
+            if (xy.length == 2) {
+              final x = double.tryParse(xy[0]) ?? 0;
+              final y = double.tryParse(xy[1]) ?? 0;
+              if (i == 0) pathObj.moveTo(x, y);
+              else pathObj.lineTo(x, y);
+            }
+          }
+          if (def.tag == 'polygon') pathObj.close();
+          canvas.drawPath(pathObj, p);
+          break;
+      }
+    }
+  }
+
+  void _drawPath(Canvas canvas, String d, Paint strokePaint, Paint? fillPaint) {
+    if (d.isEmpty) return;
+    final path = Path();
+    final re = RegExp(r'([MmLlHhVvCcSsQqTtAaZz])\s*([\d\s,.\-eE]*)');
+    double cx = 0, cy = 0;
+    double startX = 0, startY = 0;
+
+    bool parseAndMove(double x, double y, bool relative) {
+      final dx = relative ? cx + x : x;
+      final dy = relative ? cy + y : y;
+      path.moveTo(dx, dy);
+      cx = dx; cy = dy;
+      startX = dx; startY = dy;
+      return true;
+    }
+
+    bool parseAndLine(double x, double y, bool relative) {
+      final dx = relative ? cx + x : x;
+      final dy = relative ? cy + y : y;
+      path.lineTo(dx, dy);
+      cx = dx; cy = dy;
+      return true;
+    }
+
+    for (final m in re.allMatches(d)) {
+      final cmd = m.group(1)!;
+      final argsStr = m.group(2)?.trim() ?? '';
+      final args = argsStr.isEmpty ? <double>[] : argsStr.split(RegExp(r'[\s,]+')).map((s) => double.tryParse(s) ?? 0).toList();
+      final relative = cmd == cmd.toLowerCase() && cmd != 'z';
+      final upper = cmd.toUpperCase();
+
+      switch (upper) {
+        case 'M':
+          for (var i = 0; i < args.length - 1; i += 2) {
+            parseAndMove(args[i], args[i + 1], relative);
+          }
+          break;
+        case 'L':
+          for (var i = 0; i < args.length - 1; i += 2) {
+            parseAndLine(args[i], args[i + 1], relative);
+          }
+          break;
+        case 'H':
+          for (final a in args) {
+            final x = relative ? cx + a : a;
+            path.lineTo(x, cy);
+            cx = x;
+          }
+          break;
+        case 'V':
+          for (final a in args) {
+            final y = relative ? cy + a : a;
+            path.lineTo(cx, y);
+            cy = y;
+          }
+          break;
+        case 'Z':
+          path.close();
+          cx = startX; cy = startY;
+          break;
+        case 'C':
+          for (var i = 0; i < args.length - 5; i += 6) {
+            final x1 = relative ? cx + args[i] : args[i];
+            final y1 = relative ? cy + args[i + 1] : args[i + 1];
+            final x2 = relative ? cx + args[i + 2] : args[i + 2];
+            final y2 = relative ? cy + args[i + 3] : args[i + 3];
+            final x = relative ? cx + args[i + 4] : args[i + 4];
+            final y = relative ? cy + args[i + 5] : args[i + 5];
+            path.cubicTo(x1, y1, x2, y2, x, y);
+            cx = x; cy = y;
+          }
+          break;
+        case 'S':
+          // simplified - just skip smooth curve for now
+          break;
+        case 'Q':
+          for (var i = 0; i < args.length - 3; i += 4) {
+            final x1 = relative ? cx + args[i] : args[i];
+            final y1 = relative ? cy + args[i + 1] : args[i + 1];
+            final x = relative ? cx + args[i + 2] : args[i + 2];
+            final y = relative ? cy + args[i + 3] : args[i + 3];
+            path.quadraticBezierTo(x1, y1, x, y);
+            cx = x; cy = y;
+          }
+          break;
+        case 'A':
+          // skip arc for now
+          break;
+      }
+    }
+
+    canvas.drawPath(path, strokePaint);
+    if (fillPaint != null) {
+      canvas.drawPath(path, fillPaint..style = PaintingStyle.fill);
+    }
+  }
+
+  double _num(String attrs, String name) {
+    final m = RegExp('$name="([^"]*)"').firstMatch(attrs);
+    return double.tryParse(m?.group(1) ?? '0') ?? 0;
+  }
+
+  @override
+  bool shouldRepaint(covariant _SvgPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.svgPath != svgPath;
+}
+
+class _SvgPathDef {
+  final String tag;
+  final String attrs;
+  final String? fill;
+  final String? stroke;
+  _SvgPathDef(this.tag, this.attrs, this.fill, this.stroke);
+}
+
+// ============================================================================
+// Main RTU Page
+// ============================================================================
 class RtuPage extends StatefulWidget {
   const RtuPage({super.key});
 
@@ -16,10 +853,11 @@ class RtuPage extends StatefulWidget {
   State<RtuPage> createState() => _RtuPageState();
 }
 
-class _RtuPageState extends State<RtuPage> {
+class _RtuPageState extends State<RtuPage> with SingleTickerProviderStateMixin {
   static const _channel = MethodChannel('lihero_rtu');
   static const _events = EventChannel('lihero_rtu/events');
 
+  // --- Backend & connection state ---
   StreamSubscription<dynamic>? _eventSubscription;
   final _addressController = TextEditingController();
   final _commandController = TextEditingController();
@@ -38,8 +876,6 @@ class _RtuPageState extends State<RtuPage> {
   final _flowWriteValueController = TextEditingController();
   final _networkControllers = List.generate(5, (_) => _NetworkControllers());
   final _devices = <Map<String, dynamic>>[];
-  StateSetter? _scanDialogSetState;
-  final _deviceSearchController = TextEditingController();
 
   Map<String, dynamic>? _basic;
   Map<String, dynamic>? _lot;
@@ -52,9 +888,6 @@ class _RtuPageState extends State<RtuPage> {
   bool _measuring = false;
   String? _measuringType;
   bool _sensorReadInFlight = false;
-  // Set before cancelling the timer so a callback that is already queued in
-  // the event loop cannot start another Read SamInf while upload is stopping
-  // the measurement.
   bool _measurementStopRequested = false;
   bool _updating = false;
   bool _flowBaseConfigVisible = false;
@@ -65,13 +898,39 @@ class _RtuPageState extends State<RtuPage> {
   Timer? _measurementTimer;
   Timer? _uploadTimer;
   bool _busy = false;
-  /// When true, BLE command events from the EventChannel are not written to
-  /// the command log to avoid screen flickering from periodic reads and
-  /// internal device-switch refreshes.
   bool _backgroundRead = false;
 
   bool get _connected => _status == '已连接';
 
+  // --- 页面级状态 ---
+  /// 当前顶层屏幕。`home` = 原有主界面（默认入口），
+  /// `bt` = 点击 AppBar 蓝牙图标后进入的蓝牙连接页。
+  String _currentScreen = 'home';
+
+  /// 底部 tabbar 当前选中项。默认落在「概览」。
+  _RtuTab _tab = _RtuTab.overview;
+
+  /// 概览页「实时数据」卡片在窄屏下的每行卡片数（2 或 3），
+  /// 由 `LayoutBuilder` 按可用宽度动态判定。
+  int _overviewColumns = 2;
+
+  /// 概览页「断面图」的展开状态。默认隐藏，点击标题右侧的「断面图 ›」切换。
+  bool _overviewDiagramVisible = false;
+
+  /// 概览页 Hero 卡的「数据条数」估算所用常量：按上传间隔推算一轮剩余可传条数。
+  /// 仅用于进度条视觉展示，不影响任何实际业务逻辑。
+  static const _batchCapacityFallback = 200;
+  String _toastMessage = '';
+  bool _toastVisible = false;
+  Timer? _toastTimer;
+
+  // --- Animation ---
+  /// 雷达脉冲动画：三个圆环共用一条时间轴，按 1/3 相位错开（对应原型 .8s 延迟）。
+  late AnimationController _radarAnimController;
+
+  // ==========================================================================
+  // Lifecycle
+  // ==========================================================================
   @override
   void initState() {
     super.initState();
@@ -79,8 +938,6 @@ class _RtuPageState extends State<RtuPage> {
     _eventSubscription = _events.receiveBroadcastStream().listen((event) {
       if (!mounted || event is! Map) return;
       final name = event['event']?.toString() ?? '';
-      // Suppress command-log entries during background reads (periodic sensor
-      // polling and device-switch refreshes) to avoid screen flickering.
       if (_backgroundRead &&
           (name == 'commandStarted' ||
               name == 'response' ||
@@ -105,8 +962,9 @@ class _RtuPageState extends State<RtuPage> {
             _logLines.add('失败:${event['error'] ?? ''}');
           }
         }
-        if (_logLines.length > 80)
+        if (_logLines.length > 80) {
           _logLines.removeRange(0, _logLines.length - 80);
+        }
         if (name == 'ready') _status = '已连接';
         if (name == 'connecting') _status = '连接中';
         if (name == 'disconnected') {
@@ -122,12 +980,16 @@ class _RtuPageState extends State<RtuPage> {
           if (item['isRtu'] == true &&
               !_devices.any((e) => e['address'] == item['address'])) {
             _devices.add(item);
-            _scanDialogSetState?.call(() {});
           }
         }
       });
       if (hasNewCommandLog) _scrollCommandLogToEnd();
     }, onError: (_) {});
+
+    _radarAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    )..repeat();
   }
 
   void _scrollCommandLogToEnd() {
@@ -148,9 +1010,10 @@ class _RtuPageState extends State<RtuPage> {
     _uploadTimer?.cancel();
     _channel.invokeMethod('stopScan');
     _channel.invokeMethod('disconnect');
-    _deviceSearchController.dispose();
     _commandLogController.dispose();
-    for (final c in _networkControllers) c.dispose();
+    for (final nc in _networkControllers) {
+      nc.dispose();
+    }
     _addressController.dispose();
     _commandController.dispose();
     _mnController.dispose();
@@ -165,8 +1028,25 @@ class _RtuPageState extends State<RtuPage> {
     _flowReadCountController.dispose();
     _flowWriteAddressController.dispose();
     _flowWriteValueController.dispose();
+    _toastTimer?.cancel();
+    _radarAnimController.dispose();
     super.dispose();
   }
+
+  // ==========================================================================
+  // Toast & Dialog
+  // ==========================================================================
+  void _showToast(String msg) {
+    setState(() {
+      _toastMessage = msg;
+      _toastVisible = true;
+    });
+    _toastTimer?.cancel();
+    _toastTimer = Timer(const Duration(milliseconds: 1900), () {
+      if (mounted) setState(() => _toastVisible = false);
+    });
+  }
+
 
   Future<dynamic> _call(
     String method, [
@@ -178,136 +1058,6 @@ class _RtuPageState extends State<RtuPage> {
       if (mounted) _show('${e.message ?? e.code}');
       return null;
     }
-  }
-
-  Future<void> _scan() async {
-    if (Platform.isAndroid) {
-      final statuses =
-          await [
-            Permission.bluetoothScan,
-            Permission.bluetoothConnect,
-            Permission.locationWhenInUse,
-          ].request();
-      final sdk = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
-      final required =
-          sdk >= 31
-              ? [
-                statuses[Permission.bluetoothScan],
-                statuses[Permission.bluetoothConnect],
-              ]
-              : [statuses[Permission.locationWhenInUse]];
-      if (required.any(
-        (status) =>
-            status == null || status.isPermanentlyDenied || status.isDenied,
-      )) {
-        _show('请允许附近设备/位置权限后再扫描');
-        return;
-      }
-    }
-    setState(() => _devices.clear());
-    _deviceSearchController.clear();
-    if (!mounted) return;
-    // Start scanning before opening the modal; incoming scanResult events
-    // update the dialog list in real time.
-    unawaited(_call('startScan', {'durationMs': 10000}));
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            _scanDialogSetState = setDialogState;
-            final query = _deviceSearchController.text.trim().toLowerCase();
-            final devices =
-                _devices.where((device) {
-                  final name = device['name']?.toString() ?? '';
-                  final address = device['address']?.toString() ?? '';
-                  return query.isEmpty ||
-                      name.toLowerCase().contains(query) ||
-                      address.toLowerCase().contains(query);
-                }).toList();
-            return AlertDialog(
-              title: Row(
-                children: [
-                  const Expanded(child: Text('选择 RTU 蓝牙设备')),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(dialogContext).pop(),
-                  ),
-                ],
-              ),
-              content: SizedBox(
-                width: 460,
-                height: 420,
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _deviceSearchController,
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.search),
-                        hintText: '按名称或地址模糊搜索',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (_) => setDialogState(() {}),
-                    ),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child:
-                          devices.isEmpty
-                              ? Center(
-                                child: Text(
-                                  _devices.isEmpty
-                                      ? '正在扫描 RTU 设备…'
-                                      : '没有匹配的 RTU 设备',
-                                ),
-                              )
-                              : ListView.separated(
-                                itemCount: devices.length,
-                                separatorBuilder:
-                                    (_, __) => const Divider(height: 1),
-                                itemBuilder: (_, index) {
-                                  final device = devices[index];
-                                  final name =
-                                      (device['name']
-                                                  ?.toString()
-                                                  .trim()
-                                                  .isNotEmpty ==
-                                              true)
-                                          ? device['name'].toString()
-                                          : 'RTU 设备';
-                                  final address =
-                                      device['address']?.toString() ?? '';
-                                  return ListTile(
-                                    leading: const Icon(Icons.bluetooth),
-                                    title: Text(name),
-                                    subtitle: Text(
-                                      '$address    RSSI ${device['rssi'] ?? '-'}',
-                                    ),
-                                    onTap: () {
-                                      Navigator.of(dialogContext).pop();
-                                      _connect(address);
-                                    },
-                                  );
-                                },
-                              ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: const Text('取消'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-    _scanDialogSetState = null;
-    await _call('stopScan');
   }
 
   Future<void> _disconnect() async {
@@ -762,7 +1512,7 @@ class _RtuPageState extends State<RtuPage> {
                             contentPadding: EdgeInsets.zero,
                             title: const Text('启用通讯服务'),
                             value: enabled,
-                            activeColor: const Color(0xff1fc7ae),
+                            activeColor: _R.cyan,
                             onChanged:
                                 (value) =>
                                     setDialogState(() => enabled = value),
@@ -772,7 +1522,7 @@ class _RtuPageState extends State<RtuPage> {
                               padding: const EdgeInsets.only(top: 4),
                               child: Text(
                                 validationMessage!,
-                                style: const TextStyle(color: Colors.red),
+                                style: const TextStyle(color: _R.err),
                               ),
                             ),
                         ],
@@ -902,11 +1652,11 @@ class _RtuPageState extends State<RtuPage> {
     if (path != null) await _action('upgradeBin', {'path': path});
   }
 
+  /// 统一反馈通道：原型用底部 toast（.toast），这里复用页面级 toast 覆盖层，
+  /// 避免连接页与主界面出现两套提示样式。
   void _show(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    _showToast(message);
   }
 
   Future<void> _sendManualCommand() async {
@@ -964,73 +1714,18 @@ class _RtuPageState extends State<RtuPage> {
     }
   }
 
-  Future<void> _showBluetoothActions() async {
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder:
-          (sheetContext) => Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  _connected
-                      ? '已连接 ${_basic?['deviceName'] ?? 'RTU'}'
-                      : '蓝牙未连接',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '状态：$_status${_addressController.text.isEmpty ? '' : '  ${_addressController.text}'}',
-                ),
-                const SizedBox(height: 14),
-                FilledButton.icon(
-                  onPressed: () {
-                    Navigator.of(sheetContext).pop();
-                    _scan();
-                  },
-                  icon: const Icon(Icons.bluetooth_searching),
-                  label: const Text('扫描 RTU 蓝牙设备'),
-                ),
-                if (!_connected) ...[
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _addressController,
-                    textCapitalization: TextCapitalization.characters,
-                    decoration: const InputDecoration(
-                      labelText: '手动输入 RTU 蓝牙地址（15xxxxxxxxxx）',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  OutlinedButton(
-                    onPressed: () {
-                      Navigator.of(sheetContext).pop();
-                      _connect();
-                    },
-                    child: const Text('手动连接'),
-                  ),
-                ],
-                if (_connected) ...[
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: () async {
-                      Navigator.of(sheetContext).pop();
-                      await _disconnect();
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                    ),
-                    icon: const Icon(Icons.bluetooth_disabled),
-                    label: const Text('断开蓝牙'),
-                  ),
-                ],
-              ],
-            ),
-          ),
-    );
+  /// AppBar 蓝牙图标入口。
+  ///
+  /// 原实现是底部弹窗（标题状态 + 扫描设备 + 手动连接 + 断开蓝牙），
+  /// 现在改为进入蓝牙连接页，四个动作一一对应到页面里：
+  ///   扫描设备   → 页面内联的雷达 + 设备列表 + 重新搜索
+  ///   手动连接   → 「手动连接」卡片的输入框 + 按钮
+  ///   断开蓝牙   → 「连接状态」卡片里的危险按钮
+  ///   标题状态   → 头部 chip + 「连接状态」卡片
+  void _showBluetoothActions() {
+    if (_currentScreen == 'bt') return;
+    setState(() => _currentScreen = 'bt');
+    _scheduleAutoScan();
   }
 
   int _modbusCrc(List<int> data) {
@@ -1423,37 +2118,27 @@ class _RtuPageState extends State<RtuPage> {
       '${value.year.toString().padLeft(4, '0')}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')} '
       '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}:${value.second.toString().padLeft(2, '0')}';
 
-  Widget _buildDemoInteraction(Map<String, dynamic> basic) {
-    Widget button(String text, VoidCallback? action, Color color) => Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: SizedBox(
-          height: 96,
-          child: ElevatedButton(
-            onPressed: action,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: color,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-            ),
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w600),
-            ),
+
+  /// 指令交互面板：日志区 + 手动指令输入。
+  ///
+  /// 原 `_buildDemoInteraction` 中的「雷达水位计 / 雷达流量计 / RTU 设置」
+  /// 三个大按钮已由底部 tabbar 与监测页的切换段取代，此处只保留日志与输入，
+  /// 功能（查看收发日志、手动发送指令）与原实现完全一致。
+  Widget _buildCommandPanel(Map<String, dynamic> basic) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(bottom: RtuTokens.gapMd),
+          child: Text(
+            '指令交互',
+            style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700),
           ),
         ),
-      ),
-    );
-    return Column(
-      children: [
         Container(
           height: 154,
           decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xff2789cf)),
+            border: Border.all(color: _R.brand),
             borderRadius: BorderRadius.circular(5),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -1463,7 +2148,7 @@ class _RtuPageState extends State<RtuPage> {
                     alignment: Alignment.topLeft,
                     child: Text(
                       'RTU 指令交互信息将在此显示',
-                      style: TextStyle(color: Color(0xff8a8a8a)),
+                      style: TextStyle(color: _R.text3),
                     ),
                   )
                   : ListView.builder(
@@ -1473,12 +2158,12 @@ class _RtuPageState extends State<RtuPage> {
                       final line = _logLines[index];
                       final color =
                           line.startsWith('发送')
-                              ? const Color(0xff1976d2)
+                              ? _R.brand
                               : line.startsWith('接收')
-                              ? const Color(0xff7b4db5)
+                              ? _R.cyan
                               : line.startsWith('成功')
-                              ? const Color(0xff249b62)
-                              : Colors.red.shade700;
+                              ? _R.ok
+                              : _R.err;
                       return SelectableText(
                         line,
                         style: TextStyle(fontSize: 13, color: color),
@@ -1510,7 +2195,7 @@ class _RtuPageState extends State<RtuPage> {
               width: 86,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff1fc7ae),
+                  backgroundColor: _R.cyan,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -1523,42 +2208,6 @@ class _RtuPageState extends State<RtuPage> {
             ),
           ],
         ),
-        const SizedBox(height: 14),
-        Row(
-          children: [
-            button(
-              '雷达\n水位计',
-              _connected && !_busy
-                  ? () => unawaited(_switchSensorTab('swj'))
-                  : null,
-              _activeTab == 'swj'
-                  ? const Color(0xfff69a2e)
-                  : const Color(0xffa7a7a7),
-            ),
-            button(
-              '雷达\n流量计',
-              _connected && !_busy
-                  ? () => unawaited(_switchSensorTab('llj'))
-                  : null,
-              _activeTab == 'llj'
-                  ? const Color(0xff2789cf)
-                  : const Color(0xffa7a7a7),
-            ),
-            button(
-              'RTU\n设置',
-              _connected && !_busy
-                  ? () {
-                    setState(() => _activeTab = 'settings');
-                    _readAll();
-                  }
-                  : null,
-              _activeTab == 'settings'
-                  ? const Color(0xff24c7ad)
-                  : const Color(0xffa7a7a7),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
       ],
     );
   }
@@ -1579,7 +2228,7 @@ class _RtuPageState extends State<RtuPage> {
             child: RichText(
               overflow: TextOverflow.ellipsis,
               text: TextSpan(
-                style: const TextStyle(fontSize: 14, color: Color(0xff333333)),
+                style: const TextStyle(fontSize: 14, color: _R.text),
                 children: [
                   TextSpan(text: '$label：'),
                   TextSpan(
@@ -1590,8 +2239,8 @@ class _RtuPageState extends State<RtuPage> {
                     style: TextStyle(
                       color:
                           editable
-                              ? const Color(0xff1876d1)
-                              : const Color(0xff555555),
+                              ? _R.brand
+                              : _R.text2,
                     ),
                   ),
                 ],
@@ -1632,7 +2281,7 @@ class _RtuPageState extends State<RtuPage> {
                     : _batteryPercent(basic['batteryVoltage']) >= 35
                     ? Icons.battery_5_bar
                     : Icons.battery_1_bar,
-                color: const Color(0xff2d2d2d),
+                color: _R.text,
                 size: 22,
               ),
               Text(
@@ -1685,7 +2334,7 @@ class _RtuPageState extends State<RtuPage> {
               const Text('设备开关'),
               Switch.adaptive(
                 value: _deviceIsOn,
-                activeColor: const Color(0xff1fc7ae),
+                activeColor: _R.cyan,
                 onChanged:
                     _connected && !_busy
                         ? (enabled) => _action(
@@ -1698,7 +2347,7 @@ class _RtuPageState extends State<RtuPage> {
               const Text('长供电开关'),
               Switch.adaptive(
                 value: power,
-                activeColor: const Color(0xff1fc7ae),
+                activeColor: _R.cyan,
                 onChanged:
                     _connected && !_busy
                         ? (enabled) => _action('setPower', {'enabled': enabled})
@@ -1722,8 +2371,8 @@ class _RtuPageState extends State<RtuPage> {
                         Icons.signal_cellular_alt,
                         color:
                             signal >= 15
-                                ? const Color(0xff28a66b)
-                                : Colors.orange,
+                                ? _R.ok
+                                : _R.warn,
                         size: 19,
                       ),
                       const SizedBox(width: 3),
@@ -1851,9 +2500,9 @@ class _RtuPageState extends State<RtuPage> {
                 const Text('上电延时：'),
                 Text(
                   '${sensor['sampleWait'] ?? '-'} 秒',
-                  style: const TextStyle(color: Color(0xff1876d1)),
+                  style: const TextStyle(color: _R.brand),
                 ),
-                const Icon(Icons.chevron_right, color: Color(0xff999999)),
+                const Icon(Icons.chevron_right, color: _R.text3),
               ],
             ),
           ),
@@ -1872,14 +2521,14 @@ class _RtuPageState extends State<RtuPage> {
           children: [
             _demoActionButton(
               _measuring ? '停止测量' : '开始测量',
-              const Color(0xff2789cf),
+              _R.brand,
               _connected && !_busy
                   ? () => _action(_measuring ? 'stop' : 'start')
                   : null,
             ),
             _demoActionButton(
               _updating ? '上报中…' : '采集上报',
-              const Color(0xff22b886),
+              _R.ok,
               _connected && !_updating && !_busy
                   ? () => _action('upload')
                   : null,
@@ -1920,9 +2569,9 @@ class _RtuPageState extends State<RtuPage> {
                 const Text('上电延时：'),
                 Text(
                   '${sensor['sampleWait'] ?? '-'} 秒',
-                  style: const TextStyle(color: Color(0xff1876d1)),
+                  style: const TextStyle(color: _R.brand),
                 ),
-                const Icon(Icons.chevron_right, color: Color(0xff999999)),
+                const Icon(Icons.chevron_right, color: _R.text3),
               ],
             ),
           ),
@@ -1950,12 +2599,12 @@ class _RtuPageState extends State<RtuPage> {
           children: [
             _demoActionButton(
               '清空\n累计流量',
-              const Color(0xfff39a28),
+              _R.warn,
               _connected && !_busy ? () => _action('zero') : null,
             ),
             _demoActionButton(
               '基础配置',
-              const Color(0xff2789cf),
+              _R.brand,
               _connected && !_busy
                   ? () {
                     setState(() => _flowBaseConfigVisible = true);
@@ -1965,14 +2614,14 @@ class _RtuPageState extends State<RtuPage> {
             ),
             _demoActionButton(
               _measuring ? '关闭\n调试模式' : '打开\n调试模式',
-              const Color(0xffe36a9d),
+              _R.brand,
               _connected && !_busy
                   ? () => _action(_measuring ? 'stop' : 'start')
                   : null,
             ),
             _demoActionButton(
               _updating ? '上报中…' : '采集\n上报',
-              const Color(0xff22b886),
+              _R.ok,
               _connected && !_updating && !_busy
                   ? () => _action('upload')
                   : null,
@@ -2065,8 +2714,8 @@ class _RtuPageState extends State<RtuPage> {
                   style: TextStyle(
                     color:
                         onTap == null
-                            ? const Color(0xff555555)
-                            : const Color(0xff1876d1),
+                            ? _R.text2
+                            : _R.brand,
                     fontSize: 15,
                   ),
                 ),
@@ -2074,7 +2723,7 @@ class _RtuPageState extends State<RtuPage> {
               if (onTap != null)
                 const Padding(
                   padding: EdgeInsets.only(left: 4),
-                  child: Icon(Icons.chevron_right, color: Color(0xff999999)),
+                  child: Icon(Icons.chevron_right, color: _R.text3),
                 ),
             ],
           ),
@@ -2379,7 +3028,7 @@ class _RtuPageState extends State<RtuPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Color(0xffeeeeee))),
+          border: Border(bottom: BorderSide(color: _R.surface3)),
         ),
         child: Row(
           children: [
@@ -2389,10 +3038,10 @@ class _RtuPageState extends State<RtuPage> {
                 '${_flowFieldValue(field)}$unit',
                 textAlign: TextAlign.end,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Color(0xff1876d1)),
+                style: const TextStyle(color: _R.brand),
               ),
             ),
-            const Icon(Icons.chevron_right, color: Color(0xff999999)),
+            const Icon(Icons.chevron_right, color: _R.text3),
           ],
         ),
       ),
@@ -2403,7 +3052,7 @@ class _RtuPageState extends State<RtuPage> {
     final fields = _flowConfigFields();
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xff1464d9),
+        backgroundColor: _R.brand,
         foregroundColor: Colors.white,
         leading: IconButton(
           onPressed: () => setState(() => _flowBaseConfigVisible = false),
@@ -2424,13 +3073,13 @@ class _RtuPageState extends State<RtuPage> {
             children: [
               const Text(
                 '蓝牙透传 - 485 串口通信（从站地址 0x4A）',
-                style: TextStyle(color: Color(0xff666666)),
+                style: TextStyle(color: _R.text2),
               ),
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xffdddddd)),
+                  border: Border.all(color: _R.line2),
                   borderRadius: BorderRadius.circular(5),
                 ),
                 child: Column(
@@ -2616,7 +3265,7 @@ class _RtuPageState extends State<RtuPage> {
                       padding: const EdgeInsets.symmetric(vertical: 11),
                       decoration: const BoxDecoration(
                         border: Border(
-                          bottom: BorderSide(color: Color(0xffeeeeee)),
+                          bottom: BorderSide(color: _R.surface3),
                         ),
                       ),
                       child: Row(
@@ -2624,11 +3273,11 @@ class _RtuPageState extends State<RtuPage> {
                           Expanded(child: Text('$slot 号水深-系数')),
                           Text(
                             '${water?.toStringAsFixed(3) ?? '-'} m  /  ${factor?.toStringAsFixed(3) ?? '-'}',
-                            style: const TextStyle(color: Color(0xff1876d1)),
+                            style: const TextStyle(color: _R.brand),
                           ),
                           const Icon(
                             Icons.chevron_right,
-                            color: Color(0xff999999),
+                            color: _R.text3,
                           ),
                         ],
                       ),
@@ -2671,473 +3320,1097 @@ class _RtuPageState extends State<RtuPage> {
     ),
   );
 
-  @override
-  Widget build(BuildContext context) {
+
+  /// 底部 tabbar 承载的主界面。
+  ///
+  /// 四个 tab（概览 / 监测 / 数据 / 设置）共享同一个 `Scaffold`，
+  /// 顶部是各 tab 自己的头部区，底部是固定的 `_RtuTabBar`。
+  /// 原「设备信息 / 实时数据 / 参数设置」的功能入口被重新归置：
+  ///  - 概览：Hero 卡 + 快捷操作 + 实时数据卡片（新增，数据源同原页面）
+  ///  - 监测：原水位计 / 流量计面板（`_buildWaterPanel` / `_buildFlowPanel`）
+  ///  - 数据：原设备信息卡片（`_buildDemoDeviceInfo`）
+  ///  - 设置：原参数设置面板（`_buildSettingsPanel`）+ 指令交互入口
+  Widget _buildLegacyScaffold() {
     if (_flowBaseConfigVisible) return _buildFlowBaseConfigScaffold();
     final basic = _basic ?? const <String, dynamic>{};
     final lot = _lot ?? const <String, dynamic>{};
     final sensor = _sensor ?? const <String, dynamic>{};
+
+    // 各 tab 的滚动内容。用 IndexedStack 保证切换时滚动位置与局部状态不丢失。
+    final pages = <Widget>[
+      _buildOverviewTab(basic, lot, sensor),
+      _buildMonitorTab(sensor),
+      _buildDataTab(basic, lot),
+      _buildSettingsTab(basic, lot),
+    ];
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xff1464d9),
-        foregroundColor: Colors.white,
-        leading: IconButton(
-          onPressed: () => context.go('/more'),
-          icon: const Icon(Icons.arrow_back),
+      backgroundColor: _R.bg,
+      body: SafeArea(
+        bottom: false,
+        child: Stack(
+          children: [
+            IndexedStack(index: _tab.index, children: pages),
+            if (_busy) _buildLoadingOverlay(),
+          ],
         ),
-        title: Text(
-          (basic['deviceName']?.toString().trim().isNotEmpty == true)
-              ? basic['deviceName'].toString()
-              : 'RTU 采集器',
-        ),
-        actions: [
-          IconButton(
-            tooltip: _connected ? '蓝牙已连接，点击管理' : '扫描 RTU 蓝牙设备',
-            onPressed: _busy ? null : _showBluetoothActions,
-            icon: Icon(
-              _connected
-                  ? Icons.bluetooth_connected
-                  : Icons.bluetooth_searching,
-            ),
-          ),
-          IconButton(
-            onPressed: _busy ? null : _readAll,
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
       ),
-      body: Stack(
-        children: [
-          ListView(
-            padding: const EdgeInsets.fromLTRB(14, 10, 14, 24),
+      bottomNavigationBar: _RtuTabBar(
+        current: _tab,
+        onChanged: (tab) {
+          if (tab == _tab) return;
+          setState(() => _tab = tab);
+        },
+      ),
+    );
+  }
+
+  /// 顶栏：标题 + 蓝牙 / 刷新 两个动作。
+  /// 原 `AppBar` 的返回（`/more`）改为左上角图标按钮，视觉上与新版设计一致。
+  Widget _buildTopBar(Map<String, dynamic> basic) => Padding(
+    padding: const EdgeInsets.fromLTRB(6, 4, 6, 0),
+    child: Row(
+      children: [
+        IconButton(
+          tooltip: '返回',
+          onPressed: () => context.go('/more'),
+          icon: const Icon(Icons.arrow_back, color: _R.text),
+        ),
+        const Spacer(),
+        IconButton(
+          tooltip: _connected ? '蓝牙已连接，点击管理' : '打开蓝牙连接页，扫描 RTU 设备',
+          onPressed: _busy ? null : _showBluetoothActions,
+          icon: Icon(
+            _connected ? Icons.bluetooth_connected : Icons.bluetooth_searching,
+            color: _connected ? _R.brand : _R.text2,
+          ),
+        ),
+        IconButton(
+          tooltip: '刷新全部数据',
+          onPressed: _busy ? null : _readAll,
+          icon: const Icon(Icons.refresh, color: _R.text2),
+        ),
+      ],
+    ),
+  );
+
+  // --------------------------------------------------------------------------
+  // 概览 tab
+  // --------------------------------------------------------------------------
+
+  Widget _buildOverviewTab(
+    Map<String, dynamic> basic,
+    Map<String, dynamic> lot,
+    Map<String, dynamic> sensor,
+  ) {
+    final name =
+        (basic['deviceName']?.toString().trim().isNotEmpty == true)
+            ? basic['deviceName']!.toString()
+            : 'RTU 采集器';
+
+    return Column(
+      children: [
+        _buildTopBar(basic),
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: RtuTokens.pageBottom),
             children: [
-              _buildDemoInteraction(basic),
-              _buildDemoDeviceInfo(basic, lot),
-              if (_activeTab == 'swj') _buildWaterPanel(sensor),
-              if (_activeTab == 'llj') _buildFlowPanel(sensor),
-              if (_activeTab == 'settings') _buildSettingsPanel(basic, lot),
-              /* Obsolete pre-migration layout retained in source history only.
-                _card(
-                  '连接',
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _addressController,
-                              decoration: const InputDecoration(
-                                labelText: 'RTU 蓝牙地址（15xxxxxxxxxx）',
-                                isDense: true,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            onPressed: _scan,
-                            child: const Text('扫描'),
-                          ),
-                        ],
-                      ),
-                      Wrap(
-                        spacing: 8,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text('状态：$_status'),
-                          if (_connected)
-                            OutlinedButton(
-                              onPressed: _disconnect,
-                              child: const Text('断开蓝牙'),
-                            )
-                          else
-                            ElevatedButton(
-                              onPressed: _connect,
-                              child: const Text('手动连接'),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
+              _RtuPageHeader(
+                title: '设备概览',
+                subtitle: name,
+                chip: _StatusPill(
+                  text: _connected ? '通信正常' : '未连接',
+                  fg: _connected ? _R.ok : _R.text3,
+                  bg: _connected ? _R.okL : RtuTokens.barTrack,
                 ),
-                _card(
-                  'RTU 基本信息',
-                  Wrap(
-                    children: [
-                      _kv('固件版本', basic['version']),
-                      _kv('系统时间', basic['systemTime']),
-                      _kv('设备名称', basic['deviceName']),
-                      _kv('蓝牙地址', basic['bleAddress']),
-                      _kv('MN', basic['mn']),
-                      _kv('电池电压', basic['batteryVoltage']),
-                      _kv('设备编号', basic['deviceNumber']),
-                      _kv('工作状态', basic['deviceState']),
-                      _kv('连接设备位图', basic['sensorDeviceType']),
-                      _kv('长供电', basic['powerEnabled']),
-                    ],
-                  ),
-                ),
-                _card(
-                  '物联网信息',
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        children: [
-                          _kv('通信模组', lot['moduleType']),
-                          _kv('本地 IP', lot['localIp']),
-                          _kv('CCID', lot['ccid']),
-                          _kv('IMSI', lot['imsi']),
-                          _kv('信号强度', lot['signal']),
-                          _kv('待上传数据', lot['pendingCount']),
-                          _kv('上传状态', lot['uploadState']),
-                          _kv('上传错误', lot['uploadError']),
-                          _kv('上传步骤', lot['uploadStep']),
-                          _kv('最近上传', lot['uploadEndTime']),
-                          _kv('系统 ST', lot['systemSt']),
-                        ],
-                      ),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          _field(
-                            '采样间隔（分钟）',
-                            _sampleIntervalController,
-                            keyboard: TextInputType.number,
-                          ),
-                          ElevatedButton(
-                            onPressed:
-                                () => _action('setSampleInterval', {
-                                  'minutes':
-                                      int.tryParse(
-                                        _sampleIntervalController.text,
-                                      ) ??
-                                      0,
-                                }),
-                            child: const Text('设置'),
-                          ),
-                          _field(
-                            '上传间隔（分钟）',
-                            _uploadIntervalController,
-                            keyboard: TextInputType.number,
-                          ),
-                          ElevatedButton(
-                            onPressed:
-                                () => _action('setUploadInterval', {
-                                  'minutes':
-                                      int.tryParse(
-                                        _uploadIntervalController.text,
-                                      ) ??
-                                      0,
-                                }),
-                            child: const Text('设置'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: ElevatedButton.icon(
-                          onPressed: _addNetwork,
-                          icon: const Icon(Icons.add),
-                          label: const Text('一点多传 / 新增通讯'),
-                        ),
-                      ),
-                      ...List.generate(5, (i) => _networkRow(i)),
-                    ],
-                  ),
-                ),
-                _card(
-                  '传感器',
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          const Text('类型：'),
-                          DropdownButton<String>(
-                            value: _sensorType,
-                            items: const [
-                              DropdownMenuItem(
-                                value: 'llj',
-                                child: Text('流量计 LLJ'),
-                              ),
-                              DropdownMenuItem(
-                                value: 'swj',
-                                child: Text('雷达水位计 SWJ'),
-                              ),
-                            ],
-                            onChanged: (v) async {
-                              if (v == null) return;
-                              setState(() {
-                                _sensorType = v;
-                                _sensor = null;
-                              });
-                              await _readSelectedSensor();
-                            },
-                          ),
-                          if (_sensorType != 'llj') ...[
-                            OutlinedButton(
-                              onPressed: () => _action('start'),
-                              child: const Text('开始'),
-                            ),
-                            OutlinedButton(
-                              onPressed: () => _action('stop'),
-                              child: const Text('停止'),
-                            ),
-                          ],
-                          if (_sensorType == 'llj') ...[
-                            OutlinedButton(
-                              onPressed:
-                                  () => setState(
-                                    () =>
-                                        _flowBasicExpanded =
-                                            !_flowBasicExpanded,
-                                  ),
-                              child: const Text('基础配置'),
-                            ),
-                            OutlinedButton(
-                              onPressed:
-                                  () => _action(_measuring ? 'stop' : 'start'),
-                              child: Text(_measuring ? '关闭调试模式' : '打开调试模式'),
-                            ),
-                          ],
-                          if (_sensorType == 'llj')
-                            OutlinedButton(
-                              onPressed: () => _action('zero'),
-                              child: const Text('累计清零'),
-                            ),
-                          if (_sensorType == 'llj')
-                            OutlinedButton(
-                              onPressed:
-                                  _updating ? null : () => _action('upload'),
-                              child: Text(_updating ? '上报中…' : '采集上报'),
-                            ),
-                        ],
-                      ),
-                      if (_sensorType == 'swj')
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () => _action('start'),
-                                  child: const Text('开始测量'),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () => _action('stop'),
-                                  child: const Text('停止测量'),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed:
-                                      _updating
-                                          ? null
-                                          : () => _action('upload'),
-                                  child: Text(_updating ? '上报中…' : '采集上报'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      if (_sensorType == 'llj' && _flowBasicExpanded)
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            _field(
-                              '流量计上电延时（秒）',
-                              _sensorWaitController,
-                              keyboard: TextInputType.number,
-                            ),
-                            ElevatedButton(
-                              onPressed:
-                                  () => _action('setSensorWait', {
-                                    'seconds':
-                                        int.tryParse(
-                                          _sensorWaitController.text,
-                                        ) ??
-                                        0,
-                                  }),
-                              child: const Text('保存基础配置'),
-                            ),
-                          ],
-                        ),
-                      Wrap(
-                        children: [
-                          _kv('上电延时', sensor['sampleWait']),
-                          _kv('水位', sensor['waterLevel']),
-                          _kv('深度', sensor['depth']),
-                          _kv('高度', sensor['height']),
-                          _kv('方向', sensor['direction']),
-                          _kv('表面流速', sensor['surfaceVelocity']),
-                          _kv('断面流速', sensor['sectionVelocity']),
-                          _kv('流量', sensor['rateFlow']),
-                          _kv('间隔流量', sensor['intervalFlow']),
-                          _kv('累计流量', sensor['cumulativeFlowTotal']),
-                          _kv('二次累计', sensor['secondaryCumulativeFlowTotal']),
-                          _kv('夜间累计', sensor['nightCumulativeFlowTotal']),
-                          _kv('绝对累计', sensor['absoluteCumulativeFlowTotal']),
-                          _kv('横滚', sensor['roll']),
-                          _kv('俯仰', sensor['pitch']),
-                          _kv('电池电压', sensor['batteryVoltage']),
-                          _kv('厚度', sensor['thickness']),
-                          _kv('过水面积', sensor['area']),
-                          _kv('pH', sensor['ph']),
-                          _kv('溶解氧', sensor['oxygen']),
-                          _kv('电导率', sensor['conductivity']),
-                          _kv('浊度', sensor['turbidity']),
-                          _kv('ORP', sensor['orp']),
-                          _kv('雨量', sensor['rain']),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                _card(
-                  'RTU 设置',
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      _field('设备 MN', _mnController),
-                      ElevatedButton(
-                        onPressed:
-                            () =>
-                                _action('setMn', {'value': _mnController.text}),
-                        child: const Text('写入 MN'),
-                      ),
-                      _field('RTU 蓝牙地址', _addressController),
-                      ElevatedButton(
-                        onPressed:
-                            () => _action('setBleAddress', {
-                              'value': _addressController.text,
-                            }),
-                        child: const Text('写入地址'),
-                      ),
-                      _field(
-                        '通信模组类型',
-                        _lotTypeController,
-                        keyboard: TextInputType.number,
-                      ),
-                      ElevatedButton(
-                        onPressed:
-                            () => _action('setLotType', {
-                              'type':
-                                  int.tryParse(_lotTypeController.text) ?? 0,
-                            }),
-                        child: const Text('写入模组'),
-                      ),
-                      _field('系统 ST', _systemStController),
-                      ElevatedButton(
-                        onPressed:
-                            () => _action('setSystemSt', {
-                              'value': _systemStController.text,
-                            }),
-                        child: const Text('写入 ST'),
-                      ),
-                      _field(
-                        '连接设备位图',
-                        _sensorDeviceTypeController,
-                        keyboard: TextInputType.number,
-                      ),
-                      ElevatedButton(
-                        onPressed:
-                            () => _action('setSensorDeviceType', {
-                              'value':
-                                  int.tryParse(
-                                    _sensorDeviceTypeController.text,
-                                  ) ??
-                                  0,
-                            }),
-                        child: const Text('写入设备类型'),
-                      ),
-                      _field('系统时间 yyyy-MM-dd HH:mm:ss', _systemTimeController),
-                      ElevatedButton(
-                        onPressed:
-                            () => _action('setSystemTime', {
-                              'value': _systemTimeController.text,
-                            }),
-                        child: const Text('写入时间'),
-                      ),
-                      _field(
-                        '传感器上电延时（秒）',
-                        _sensorWaitController,
-                        keyboard: TextInputType.number,
-                      ),
-                      ElevatedButton(
-                        onPressed:
-                            () => _action('setSensorWait', {
-                              'seconds':
-                                  int.tryParse(_sensorWaitController.text) ?? 0,
-                            }),
-                        child: const Text('写入延时'),
-                      ),
-                      Switch(
-                        value: (basic['powerEnabled'] as num?)?.toInt() == 1,
-                        onChanged: (v) => _action('setPower', {'enabled': v}),
-                      ),
-                      const Text('长供电'),
-                    ],
-                  ),
-                ),
-                _card(
-                  '协议升级与调试',
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            onPressed: _upgrade,
-                            child: const Text('选择 .bin 并发送'),
-                          ),
-                          SizedBox(
-                            width: 240,
-                            child: TextField(
-                              controller: _commandController,
-                              decoration: const InputDecoration(
-                                labelText: '自定义 RTU 命令',
-                                isDense: true,
-                              ),
-                            ),
-                          ),
-                          OutlinedButton(
-                            onPressed:
-                                () => _action('sendCommand', {
-                                  'command': _commandController.text,
-                                }),
-                            child: const Text('发送'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        '升级文件协议需以设备固件实际握手为准；发送前请确认设备处于升级模式。',
-                        style: TextStyle(color: Colors.orange),
-                      ),
-                    ],
-                  ),
-                ),
-              ],*/
+              ),
+              if (!_connected) _buildConnectPromptCard(),
+              _buildHeroCard(basic, lot, sensor),
+              const SizedBox(height: RtuTokens.blockGap),
+              _buildStatusAlert(sensor),
+              const SizedBox(height: RtuTokens.sectionGap),
+              _buildQuickActions(),
+              const SizedBox(height: RtuTokens.sectionGap),
+              _buildRealtimeSection(sensor),
+              const SizedBox(height: RtuTokens.sectionGap),
+              _buildSectionAndDevicesSection(sensor),
+              const SizedBox(height: RtuTokens.sectionGap),
+              _buildPlatformStatusSection(lot),
             ],
           ),
-          if (_busy) _buildLoadingOverlay(),
+        ),
+      ],
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // 概览 tab —— 平台连接状态 / 断面与下端设备
+  // --------------------------------------------------------------------------
+
+  /// 「平台连接状态」卡片。
+  ///
+  /// 字段与 `_buildDemoDeviceInfo`（数据 tab）保持一一对应：
+  ///   - 平台连接状态 → `_connected` + `lot['signal']`（通信链路状态，非多传服务）
+  ///   - 上次上传成功 → `lot['uploadEndTime']`
+  ///   - 未上传数据   → `lot['pendingCount']`
+  ///   - 物联网卡     → `lot['ccid']` + `lot['moduleType']`
+  Widget _buildPlatformStatusSection(Map<String, dynamic> lot) {
+    final signal = (lot['signal'] as num?)?.toInt() ?? 0;
+    final pending = (lot['pendingCount'] as num?)?.toInt() ?? 0;
+    final ccid = _text(lot['ccid']);
+    final module = _moduleText(lot['moduleType']);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _overviewSectionTitle('平台连接状态'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: RtuTokens.pageInset),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: RtuTokens.cardPadding,
+              vertical: 3,
+            ),
+            decoration: BoxDecoration(
+              color: _R.surface,
+              borderRadius: RtuTokens.brCard,
+              border: Border.all(color: _R.line),
+            ),
+            child: Column(
+              children: [
+                _KvRow(
+                  label: '平台连接状态',
+                  value: _connected ? '已连接 · $signal 协议' : '未连接',
+                  valueColor: _connected ? _R.ok : _R.text3,
+                  icon: _connected
+                      ? Icons.check_circle_outline
+                      : Icons.link_off,
+                ),
+                _KvRow(
+                  label: '上次上传成功',
+                  value: _text(lot['uploadEndTime']),
+                  valueColor: _R.text,
+                ),
+                _KvRow(
+                  label: '未上传数据',
+                  value: '$pending 条',
+                  valueColor: _R.text,
+                ),
+                _KvRow(
+                  label: '物联网卡',
+                  value: ccid == '-'
+                      ? '-'
+                      : (module == '-' ? ccid : '$ccid · $module'),
+                  valueColor: _R.text,
+                  last: true,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 「断面与下端设备」卡片。
+  ///
+  /// 上半部分是断面示意图（数值取自遥测 + 流量计基础配置寄存器），
+  /// 下半部分列出已搜到的下端设备（字段同蓝牙页设备行）。
+  /// 断面图当前按需求默认隐藏，按下「断面图 ›」时展开。
+  Widget _buildSectionAndDevicesSection(Map<String, dynamic> sensor) {
+    final rows = <Widget>[
+      for (final device in _devices)
+        _DeviceRow(
+          title: _text(device['name'], fallback: 'RTU 下端设备'),
+          subtitle: [
+            if (_text(device['address']) != '-')
+              'RS485 · ${_text(device['address'])}',
+            '协议 LHLL',
+          ].join(' · '),
+          connected: _connected,
+        ),
+      if (_devices.isEmpty)
+        _DeviceRow(
+          title: _connected ? '下端设备探测中…' : '未检测到应答',
+          subtitle: _connected ? '正在等待 RTU 返回从站信息' : '请先连接 RTU',
+          connected: false,
+          last: true,
+        ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _overviewSectionTitle(
+          '断面与下端设备',
+          action: InkWell(
+            onTap: () => setState(() => _overviewDiagramVisible = !_overviewDiagramVisible),
+            child: Row(
+              children: [
+                Text(
+                  _overviewDiagramVisible ? '收起断面图' : '断面图',
+                  style: RtuTextStyles.sectionAction.copyWith(
+                    color: _R.brand,
+                    fontSize: 12.5,
+                  ),
+                ),
+                Icon(
+                  _overviewDiagramVisible
+                      ? Icons.keyboard_arrow_up
+                      : Icons.chevron_right,
+                  size: 17,
+                  color: _R.brand,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: RtuTokens.pageInset),
+          child: Column(
+            children: [
+              if (_overviewDiagramVisible) ...[
+                Container(
+                  padding: const EdgeInsets.all(RtuTokens.cardPadding),
+                  decoration: BoxDecoration(
+                    color: _R.surface,
+                    borderRadius: RtuTokens.brCard,
+                    border: Border.all(color: _R.line),
+                  ),
+                  child: Column(
+                    children: [
+                      _SectionDiagram(
+                        height: 168,
+                        waterLevel: _toDouble(sensor['waterLevel']),
+                        velocity: _toDouble(sensor['surfaceVelocity']),
+                        bottomWidth: _toDouble(_flowRegisters[40086]),
+                        slope: _toDouble(_flowRegisters[40088]),
+                        thickness: _toDouble(_flowRegisters[40092]),
+                      ),
+                      const SizedBox(height: RtuTokens.gapMd),
+                      Text(
+                        _sectionSummaryText(sensor),
+                        style: RtuTextStyles.rowSubtitle.copyWith(
+                          color: _R.text3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: RtuTokens.blockGap),
+              ],
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: RtuTokens.cardPadding,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: _R.surface,
+                  borderRadius: RtuTokens.brCard,
+                  border: Border.all(color: _R.line),
+                ),
+                child: Column(children: rows),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 断面底部的说明文字，字段全部来自已有数据源。
+  String _sectionSummaryText(Map<String, dynamic> sensor) {
+    final shape = _flowRegisters[40085];
+    final shapeLabel = _sectionShapeText(shape);
+    final width = _text(
+      _formatRegisterValue(_flowRegisters[40086]),
+      fallback: '-',
+    );
+    final slope = _text(_flowRegisters[40088], fallback: '-');
+    final thickness = _text(
+      _formatRegisterValue(_flowRegisters[40092]),
+      fallback: '-',
+    );
+    return '$shapeLabel · 底宽 $width m · 边坡 $slope · 淤积 $thickness m³';
+  }
+
+  String _sectionShapeText(dynamic shape) => switch (shape) {
+    0 => '矩形断面',
+    1 => '梯形断面',
+    2 => 'V 形断面',
+    3 => 'U 形断面',
+    4 => '圆形断面',
+    5 => '不规则断面',
+    _ => '断面',
+  };
+
+  /// 统一取值：空值 / null 一律回落到 `-`。
+  String _text(dynamic value, {String fallback = '-'}) {
+    final text = value?.toString().trim() ?? '';
+    return text.isEmpty ? fallback : text;
+  }
+
+  double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  /// 基础配置寄存器里的浮点值（低字在前），拿不到时回落 `-`。
+  String _formatRegisterValue(dynamic raw) {
+    if (raw is! num) return '-';
+    return (raw / 1000).toStringAsFixed(2);
+  }
+
+  /// 未连接时的引导卡片：把原来的「扫描 / 连接」入口以更轻的方式呈现。
+  Widget _buildConnectPromptCard() => Padding(
+    padding: const EdgeInsets.fromLTRB(
+      RtuTokens.pageInset,
+      0,
+      RtuTokens.pageInset,
+      RtuTokens.blockGap,
+    ),
+    child: Material(
+      color: _R.brandL,
+      borderRadius: RtuTokens.brCard,
+      child: InkWell(
+        borderRadius: RtuTokens.brCard,
+        onTap: _busy ? null : _showBluetoothActions,
+        child: Padding(
+          padding: const EdgeInsets.all(RtuTokens.cardPadding),
+          child: Row(
+            children: [
+              _IconTile(
+                icon: Icons.bluetooth_searching,
+                fg: _R.brand,
+                bg: Colors.white,
+              ),
+              const SizedBox(width: RtuTokens.gapXl),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '尚未连接 RTU',
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w600,
+                        color: _R.brandD,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      '点击搜索附近的 RTU 设备并建立蓝牙连接',
+                      style: TextStyle(fontSize: 11.5, color: _R.text2),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: _R.brand),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+
+  /// Hero 卡：设备名 / 在线状态 / 核心指标 / 数据进度条。
+  Widget _buildHeroCard(
+    Map<String, dynamic> basic,
+    Map<String, dynamic> lot,
+    Map<String, dynamic> sensor,
+  ) {
+    final battery = _batteryPercent(basic['batteryVoltage']);
+    final voltage = basic['batteryVoltage']?.toString() ?? '-';
+    final signal = (lot['signal'] as num?)?.toInt() ?? 0;
+    final mn = basic['mn']?.toString();
+    final version = basic['version']?.toString();
+    final sampleInterval = lot['sampleInterval']?.toString() ?? '-';
+    final uploadInterval = lot['uploadInterval']?.toString() ?? '-';
+    final pending = (lot['pendingCount'] as num?)?.toInt() ?? 0;
+
+    // 进度条表示本轮待上传数据占批量的比例（纯视觉，无业务含义）。
+    final progress =
+        (pending / _batchCapacityFallback).clamp(0.0, 1.0).toDouble();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: RtuTokens.pageInset),
+      child: Container(
+        padding: const EdgeInsets.all(RtuTokens.cardPadding + 1),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: AppColors.rtuHeroGradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: RtuTokens.brHero,
+          boxShadow: RtuShadows.hero,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    (basic['deviceName']?.toString().trim().isNotEmpty == true)
+                        ? basic['deviceName']!.toString()
+                        : 'RTU 采集器',
+                    style: RtuTextStyles.heroName.copyWith(
+                      fontSize: 19,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 9,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.22),
+                    borderRadius: BorderRadius.circular(RtuTokens.radiusChip),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: RtuTokens.statusDot,
+                        height: RtuTokens.statusDot,
+                        decoration: const BoxDecoration(
+                          color: AppColors.rtuHeroDot,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        _connected ? '在线' : '离线',
+                        style: const TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              [
+                'LHRTU 200',
+                if (mn?.isNotEmpty == true) 'MN $mn',
+                if (version?.isNotEmpty == true) '固件 $version',
+              ].join(' · '),
+              style: RtuTextStyles.heroMeta.copyWith(
+                color: Colors.white.withValues(alpha: 0.82),
+              ),
+            ),
+            const SizedBox(height: RtuTokens.gapXxl),
+            Row(
+              children: [
+                _heroMetric('电池电量', '$battery%'),
+                const SizedBox(width: RtuTokens.gapLg),
+                _heroMetric('电池电压', '${voltage}v'),
+                const SizedBox(width: RtuTokens.gapLg),
+                _heroMetric('信号强度', '$signal CSQ'),
+              ],
+            ),
+            const SizedBox(height: RtuTokens.gapXxl),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(RtuTokens.progressHeight),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: RtuTokens.progressHeight,
+                backgroundColor: Colors.white.withValues(alpha: 0.25),
+                valueColor: const AlwaysStoppedAnimation(AppColors.rtuHeroDot),
+              ),
+            ),
+            const SizedBox(height: RtuTokens.gapMd),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '间隔工作模式 · 采集 $sampleInterval min / 上传 $uploadInterval min',
+                    style: RtuTextStyles.heroFoot.copyWith(
+                      color: Colors.white.withValues(alpha: 0.86),
+                    ),
+                  ),
+                ),
+                Text(
+                  '待传 $pending 条',
+                  style: RtuTextStyles.heroFoot.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _heroMetric(String key, String value) => Expanded(
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(RtuTokens.radiusMetric),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            key,
+            style: RtuTextStyles.heroMetricKey.copyWith(
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
+          ),
+          const SizedBox(height: 3),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              style: RtuTextStyles.heroMetricValue.copyWith(
+                color: Colors.white,
+              ),
+            ),
+          ),
         ],
       ),
+    ),
+  );
+
+  /// 运行状态提示条：水位在阈值内显示正常，越限或未连接时给出相应提示。
+  Widget _buildStatusAlert(Map<String, dynamic> sensor) {
+    final waterLevel = sensor['waterLevel'];
+    final hasLevel = waterLevel != null && waterLevel.toString().isNotEmpty;
+
+    late final Color fg;
+    late final Color bg;
+    late final IconData icon;
+    late final String message;
+
+    if (!_connected) {
+      fg = _R.text2;
+      bg = RtuTokens.barTrack;
+      icon = Icons.info_outline;
+      message = '未连接 RTU，连接后可查看实时水位与设备运行状态。';
+    } else if (!hasLevel) {
+      fg = _R.warn;
+      bg = AppColors.rtuWarnL;
+      icon = Icons.hourglass_empty;
+      message = '已连接，正在读取传感器数据…';
+    } else {
+      fg = _R.ok;
+      bg = _R.okL;
+      icon = Icons.check_circle_outline;
+      message = '设备运行正常，当前水位 ${waterLevel}m，处于正常范围内。';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: RtuTokens.pageInset),
+      child: Container(
+        padding: const EdgeInsets.all(RtuTokens.cardPaddingTight),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: RtuTokens.brCard,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 18, color: fg),
+            const SizedBox(width: RtuTokens.gapXl),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(fontSize: 12.5, height: 1.45, color: fg),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 区块标题（「快捷操作」「实时数据」…）。
+  Widget _overviewSectionTitle(String title, {Widget? action}) => Padding(
+    padding: const EdgeInsets.fromLTRB(
+      RtuTokens.pageInset,
+      0,
+      RtuTokens.pageInset,
+      RtuTokens.gapXl,
+    ),
+    child: Row(
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w700),
+        ),
+        const Spacer(),
+        if (action != null) action,
+      ],
+    ),
+  );
+
+  /// 快捷操作四宫格。功能与原有按钮完全一致：
+  /// 立即采集 → 读一次传感器；立即上传 → 采集上报；开始测量 → start/stop；
+  /// 导出数据 → 读取基础/物联网/传感器全部信息并提示结果。
+  Widget _buildQuickActions() {
+    final canOperate = _connected && !_busy;
+
+    Widget tile(IconData icon, String label, Color fg, Color bg, VoidCallback? onTap) =>
+        Expanded(
+          child: Material(
+            color: _R.surface,
+            borderRadius: RtuTokens.brCard,
+            child: InkWell(
+              borderRadius: RtuTokens.brCard,
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                child: Column(
+                  children: [
+                    _IconTile(
+                      icon: icon,
+                      fg: onTap == null ? _R.text3 : fg,
+                      bg: onTap == null ? RtuTokens.barTrack : bg,
+                    ),
+                    const SizedBox(height: RtuTokens.gapMd),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: onTap == null ? _R.text3 : _R.text,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _overviewSectionTitle('快捷操作'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: RtuTokens.pageInset),
+          child: Row(
+            children: [
+              tile(
+                Icons.crop_free,
+                '立即采集',
+                _R.brand,
+                _R.brandL,
+                canOperate ? () => unawaited(_readSelectedSensor(showLoading: true)) : null,
+              ),
+              const SizedBox(width: RtuTokens.gapMd),
+              tile(
+                Icons.arrow_circle_up_outlined,
+                '立即上传',
+                _R.cyan,
+                AppColors.rtuCyanL,
+                canOperate && !_updating ? () => _action('upload') : null,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: RtuTokens.gapMd),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: RtuTokens.pageInset),
+          child: Row(
+            children: [
+              tile(
+                _measuring ? Icons.pause_circle_outline : Icons.play_circle_outline,
+                _measuring ? '停止测量' : '开始测量',
+                _R.warn,
+                AppColors.rtuWarnL,
+                canOperate ? () => _action(_measuring ? 'stop' : 'start') : null,
+              ),
+              const SizedBox(width: RtuTokens.gapMd),
+              tile(
+                Icons.download_outlined,
+                '导出数据',
+                _R.ok,
+                _R.okL,
+                canOperate ? () => unawaited(_readAll()) : null,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 实时数据卡片区。字段与「雷达水位计 / 雷达流量计」面板保持一致，
+  /// 只是把关键数值以更大的卡片形式呈现在概览页。
+  Widget _buildRealtimeSection(Map<String, dynamic> sensor) {
+    final metrics = <_RealtimeMetric>[
+      _RealtimeMetric('水位', sensor['waterLevel'], 'm'),
+      _RealtimeMetric('水深', sensor['depth'], 'm'),
+      _RealtimeMetric('表面流速', sensor['surfaceVelocity'], 'm/s'),
+      _RealtimeMetric('瞬时流量', sensor['rateFlow'], 'm³/s'),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _overviewSectionTitle(
+          '实时数据',
+          action: InkWell(
+            onTap: () => setState(() => _tab = _RtuTab.data),
+            child: Row(
+              children: [
+                Text(
+                  '查看全部',
+                  style: RtuTextStyles.sectionAction.copyWith(
+                    color: _R.brand,
+                    fontSize: 12.5,
+                  ),
+                ),
+                const Icon(Icons.chevron_right, size: 17, color: _R.brand),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: RtuTokens.pageInset),
+          child: LayoutBuilder(
+            builder: (_, constraints) {
+              // 窄屏两列、宽屏三列，避免数值与单位换行。
+              final columns = constraints.maxWidth >= 330 ? 3 : 2;
+              final rows = <Widget>[];
+              for (var i = 0; i < metrics.length; i += columns) {
+                final chunk = metrics.sublist(
+                  i,
+                  (i + columns).clamp(0, metrics.length),
+                );
+                rows.add(
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var j = 0; j < columns; j++)
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: j == columns - 1 ? 0 : RtuTokens.gapMd,
+                            ),
+                            child: j < chunk.length
+                                ? _realtimeCard(chunk[j])
+                                : const SizedBox.shrink(),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+                if (i + columns < metrics.length) {
+                  rows.add(const SizedBox(height: RtuTokens.gapMd));
+                }
+              }
+              return Column(children: rows);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _realtimeCard(_RealtimeMetric metric) => Container(
+    padding: const EdgeInsets.all(RtuTokens.cardPaddingTight),
+    decoration: BoxDecoration(
+      color: _R.surface,
+      borderRadius: RtuTokens.brCard,
+      border: Border.all(color: _R.line),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          metric.label,
+          style: const TextStyle(fontSize: 12, color: _R.text2),
+        ),
+        const SizedBox(height: RtuTokens.gapSm),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  metric.value,
+                  style: const TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.w700,
+                    color: _R.text,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 2),
+            Text(
+              metric.unit,
+              style: const TextStyle(fontSize: 11.5, color: _R.text2),
+            ),
+          ],
+        ),
+        const SizedBox(height: RtuTokens.gapSm),
+        _SparkLine(color: _R.cyan),
+      ],
+    ),
+  );
+
+  // --------------------------------------------------------------------------
+  // 监测 / 数据 / 设置 tab
+  // --------------------------------------------------------------------------
+
+  /// 监测 tab：选择水位计或流量计面板，并保留开始测量 / 采集上报。
+  Widget _buildMonitorTab(Map<String, dynamic> sensor) => Column(
+    children: [
+      _RtuPageHeader(
+        title: '实时监测',
+        subtitle: '雷达水位计 / 雷达流量计',
+        chip: _StatusPill(
+          text: _activeTab == 'llj' ? '流量计' : '水位计',
+          fg: _activeTab == 'llj' ? _R.brand : _R.warn,
+          bg: _activeTab == 'llj' ? _R.brandL : AppColors.rtuWarnL,
+        ),
+      ),
+      Expanded(
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: RtuTokens.pageBottom),
+          children: [
+            if (!_connected) _buildConnectPromptCard(),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: RtuTokens.pageInset,
+              ),
+              child: Column(
+                children: [
+                  _buildSensorSwitch(),
+                  if (_activeTab == 'llj')
+                    _buildFlowPanel(sensor)
+                  else
+                    _buildWaterPanel(sensor),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+
+  /// 水位计 / 流量计切换段（替代原首页的两个大按钮）。
+  Widget _buildSensorSwitch() {
+    Widget item(String label, bool selected, VoidCallback? onTap) => Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? _R.brand : Colors.transparent,
+            borderRadius: BorderRadius.circular(RtuTokens.radiusControl),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: selected ? Colors.white : _R.text2,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final canSwitch = _connected && !_busy;
+    return Container(
+      margin: const EdgeInsets.only(bottom: RtuTokens.sectionGap),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: _R.surface3,
+        borderRadius: BorderRadius.circular(RtuTokens.radiusRow),
+      ),
+      child: Row(
+        children: [
+          item(
+            '雷达水位计',
+            _activeTab != 'llj',
+            canSwitch ? () => unawaited(_switchSensorTab('swj')) : null,
+          ),
+          item(
+            '雷达流量计',
+            _activeTab == 'llj',
+            canSwitch ? () => unawaited(_switchSensorTab('llj')) : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 数据 tab：设备信息（原 `_buildDemoDeviceInfo`）。
+  Widget _buildDataTab(
+    Map<String, dynamic> basic,
+    Map<String, dynamic> lot,
+  ) => Column(
+    children: [
+      _RtuPageHeader(
+        title: '设备数据',
+        subtitle: '设备信息 · 通信状态 · 网络配置',
+        chip: _StatusPill(
+          text: _connected ? '已连接' : '未连接',
+          fg: _connected ? _R.ok : _R.text3,
+          bg: _connected ? _R.okL : RtuTokens.barTrack,
+        ),
+      ),
+      Expanded(
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: RtuTokens.pageBottom),
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: RtuTokens.pageInset,
+              ),
+              child: _buildDemoDeviceInfo(basic, lot),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+
+  /// 设置 tab：参数设置面板（原 `_buildSettingsPanel`）+ 指令交互入口。
+  ///
+  /// 「指令交互」在原首页是与三个大按钮并列的一块，这里以按钮形式保留入口，
+  /// 点击后弹出与原先完全一致的日志面板与手动指令输入。
+  Widget _buildSettingsTab(
+    Map<String, dynamic> basic,
+    Map<String, dynamic> lot,
+  ) => Column(
+    children: [
+      _RtuPageHeader(
+        title: '设置',
+        subtitle: '设备参数 · 蓝牙连接 · 指令交互',
+        chip: _StatusPill(
+          text: _connected ? '可编辑' : '未连接',
+          fg: _connected ? _R.brand : _R.text3,
+          bg: _connected ? _R.brandL : RtuTokens.barTrack,
+        ),
+      ),
+      Expanded(
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: RtuTokens.pageBottom),
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: RtuTokens.pageInset,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildSettingsActions(),
+                  const SizedBox(height: RtuTokens.sectionGap),
+                  _buildSettingsPanel(basic, lot),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+
+  Widget _buildSettingsActions() => Column(
+    children: [
+      _actionRow(
+        icon: Icons.bluetooth,
+        label: '蓝牙连接管理',
+        value: _connected ? '已连接' : '未连接',
+        onTap: _busy ? null : _showBluetoothActions,
+      ),
+      const SizedBox(height: RtuTokens.gapMd),
+      _actionRow(
+        icon: Icons.terminal,
+        label: '指令交互 / 日志',
+        value: '打开',
+        onTap: _busy ? null : _openCommandLogSheet,
+      ),
+    ],
+  );
+
+  Widget _actionRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    VoidCallback? onTap,
+  }) => Material(
+    color: _R.surface,
+    borderRadius: RtuTokens.brCard,
+    child: InkWell(
+      borderRadius: RtuTokens.brCard,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(RtuTokens.rowPadding),
+        child: Row(
+          children: [
+            _IconTile(icon: icon, fg: _R.brand, bg: _R.brandL),
+            const SizedBox(width: RtuTokens.gapXl),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500),
+              ),
+            ),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 13, color: _R.text2),
+            ),
+            const Icon(Icons.chevron_right, color: _R.text3),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  /// 弹出指令交互面板。内容复用 `_buildDemoInteraction`，
+  /// 保证日志显示、手动发送指令等原有能力原样保留。
+  Future<void> _openCommandLogSheet() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: _R.bg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(RtuTokens.radiusHero),
+        ),
+      ),
+      builder:
+          (sheetContext) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(RtuTokens.pageInset),
+                child: SingleChildScrollView(
+                  child: _buildCommandPanel(
+                    _basic ?? const <String, dynamic>{},
+                  ),
+                ),
+              ),
+            ),
+          ),
     );
   }
 
@@ -3149,12 +4422,12 @@ class _RtuPageState extends State<RtuPage> {
         child: RichText(
           overflow: TextOverflow.ellipsis,
           text: TextSpan(
-            style: const TextStyle(fontSize: 14, color: Color(0xff333333)),
+            style: const TextStyle(fontSize: 14, color: _R.text),
             children: [
               TextSpan(text: '$label：'),
               TextSpan(
                 text: value.isEmpty ? '-' : value,
-                style: const TextStyle(color: Color(0xff1876d1)),
+                style: const TextStyle(color: _R.brand),
               ),
             ],
           ),
@@ -3168,7 +4441,7 @@ class _RtuPageState extends State<RtuPage> {
         borderRadius: BorderRadius.circular(5),
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xffd9d9d9)),
+            border: Border.all(color: _R.line2),
             borderRadius: BorderRadius.circular(5),
           ),
           child: Padding(
@@ -3198,7 +4471,7 @@ class _RtuPageState extends State<RtuPage> {
                           _connected && !_busy
                               ? () => _removeNetwork(index)
                               : null,
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                      style: TextButton.styleFrom(foregroundColor: _R.err),
                       child: const Text('删除'),
                     ),
                   ],
@@ -3226,6 +4499,675 @@ class _RtuPageState extends State<RtuPage> {
       ),
     );
   }
+
+
+  // ==========================================================================
+  // 蓝牙连接页（还原原型 #connect）
+  //   入口：主界面 AppBar 的蓝牙图标（原先是底部弹窗，动作集合完全保留，
+  //         只把表现形式换成整屏页面）。
+  //   结构：.hd 头部 + .radar 雷达 + .sec 分组头 + .devs 设备行 + .toast 轻提示
+  //   颜色/圆角/字号统一取 _R 与 RtuTokens / RtuTextStyles，不再出现裸色值。
+  // ==========================================================================
+
+  /// 蓝牙页是独立的一屏，只在点击蓝牙图标后进入，`返回` 回到主界面。
+  bool get _showBluetoothPage => _currentScreen == 'bt';
+
+  @override
+  Widget build(BuildContext context) {
+    return RtuTheme.apply(
+      context: context,
+      child: Stack(
+        children: [
+          if (_showBluetoothPage)
+            Positioned.fill(child: _buildBluetoothPage())
+          else
+            Positioned.fill(child: _buildLegacyScaffold()),
+          // 全局轻提示：两个界面共用同一套 toast，行为与原型一致。
+          _buildToast(),
+        ],
+      ),
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // 页面骨架
+  // --------------------------------------------------------------------------
+  Widget _buildBluetoothPage() {
+    final connecting = _status == '连接中';
+    return Scaffold(
+      backgroundColor: _R.bg,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                _buildConnectHeader(),
+                Expanded(
+                  child: ListView(
+                    padding: RtuTokens.bodyInsets,
+                    children: [
+                      const SizedBox(height: RtuTokens.gapSm),
+                      _buildRadar(),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: 18,
+                        ), // .radar 下间距
+                        child: Text(
+                          connecting
+                              ? '正在连接 RTU 设备…'
+                              : _connected
+                              ? '蓝牙已连接，可继续搜索并切换设备'
+                              : '正在搜索附近 RTU 设备…',
+                          textAlign: TextAlign.center,
+                          style: RtuTextStyles.body2.copyWith(color: _R.text2),
+                        ),
+                      ),
+                      _buildDeviceSectionHeader(connecting),
+                      if (_devices.isEmpty)
+                        _buildEmptyDevices(connecting)
+                      else
+                        ..._devices.map(_buildDeviceRow),
+                      // 弹窗时代的「状态 / 手动连接 / 断开」三块功能落在下方。
+                      _buildLinkStatusCard(),
+                      if (!_connected) _buildManualConnectCard(),
+                      const SizedBox(height: RtuTokens.gapLg),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (_busy) _buildLoadingOverlay(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// .hd —— 返回、标题/副标题、右侧状态 chip
+  Widget _buildConnectHeader() {
+    return Container(
+      color: _R.surface2,
+      padding: const EdgeInsets.fromLTRB(
+        RtuTokens.pageInset,
+        RtuTokens.gapSm,
+        RtuTokens.pageInset,
+        10,
+      ),
+      child: Row(
+        children: [
+          _buildBackButton(),
+          const SizedBox(width: RtuTokens.gapXxl),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '设备连接',
+                  style: RtuTextStyles.pageTitle.copyWith(color: _R.text),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '蓝牙直连 · 无需拆线接线',
+                  style: RtuTextStyles.pageSubtitle.copyWith(color: _R.text3),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: RtuTokens.gapMd),
+          if (_connected)
+            _buildChip('已连接', fg: _R.ok, bg: _R.okL)
+          else
+            _buildChip('蓝牙已开启', fg: _R.brandD, bg: _R.brandL),
+        ],
+      ),
+    );
+  }
+
+  /// .back —— 30×30 圆角描边按钮，返回主界面
+  Widget _buildBackButton() {
+    final radius = BorderRadius.circular(RtuTokens.radiusControl);
+    return SizedBox(
+      width: 30,
+      height: 30,
+      child: Material(
+        color: _R.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: _R.line),
+        ),
+        child: InkWell(
+          borderRadius: radius,
+          onTap: _busy ? null : _backToMainPage,
+          child: Center(child: _Icons.svg('back', size: 16, color: _R.text2)),
+        ),
+      ),
+    );
+  }
+
+  /// .chip —— 胶囊状态标签
+  Widget _buildChip(String text, {required Color fg, required Color bg}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(color: bg, borderRadius: RtuTokens.brChip),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: RtuTokens.statusDot,
+            height: RtuTokens.statusDot,
+            decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: RtuTokens.gapXs),
+          Text(text, style: RtuTextStyles.chip.copyWith(color: fg)),
+        ],
+      ),
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // .radar —— 三个错相脉冲环 + 渐变核心
+  // --------------------------------------------------------------------------
+  Widget _buildRadar() {
+    return SizedBox(
+      height: RtuTokens.radarSize,
+      child: Center(
+        child: SizedBox(
+          width: RtuTokens.radarSize,
+          height: RtuTokens.radarSize,
+          child: AnimatedBuilder(
+            animation: _radarAnimController,
+            builder: (context, child) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  for (var i = 0; i < 3; i++) _buildRadarRing(i),
+                  child!,
+                ],
+              );
+            },
+            child: _buildRadarCore(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 单环：t 在 [0,1) 内循环，缩放 1 → 1.5，透明度 .9 → 0（对齐 @keyframes pulse）。
+  Widget _buildRadarRing(int index) {
+    final t = (_radarAnimController.value + index / 3) % 1.0;
+    final size = RtuTokens.radarRing * (1 + .5 * t);
+    return Opacity(
+      opacity: (.9 * (1 - t)).clamp(0.0, 1.0),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.rtuRadarRing),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRadarCore() {
+    return Container(
+      width: RtuTokens.radarCore,
+      height: RtuTokens.radarCore,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: AppColors.rtuRadarCoreGradient,
+        ),
+        boxShadow: RtuShadows.radarCore,
+      ),
+      child: Center(child: _Icons.svg('bt', size: 26, color: _R.surface)),
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // .sec —— 分组标题 + 重新搜索
+  // --------------------------------------------------------------------------
+  Widget _buildDeviceSectionHeader(bool connecting) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: RtuTokens.sectionGap,
+        bottom: RtuTokens.gapLg,
+      ),
+      child: Row(
+        children: [
+          Text(
+            '发现的设备 ${_devices.length}',
+            style: RtuTextStyles.sectionTitle.copyWith(color: _R.text2),
+          ),
+          const Spacer(),
+          InkWell(
+            borderRadius: RtuTokens.brChip,
+            onTap: (_busy || connecting) ? null : _startConnectScan,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Text(
+                '重新搜索',
+                style: RtuTextStyles.sectionAction.copyWith(color: _R.brand),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 空态：原型为扫描中的占位，这里补上未发现设备时的引导文案。
+  Widget _buildEmptyDevices(bool connecting) {
+    return Container(
+      padding: RtuTokens.cardInsets,
+      decoration: BoxDecoration(
+        color: _R.surface,
+        border: Border.all(color: _R.line),
+        borderRadius: RtuTokens.brCard,
+      ),
+      child: Row(
+        children: [
+          _Icons.svg(
+            'scan',
+            size: 18,
+            color: connecting ? _R.brand : _R.text3,
+          ),
+          const SizedBox(width: RtuTokens.gapXl),
+          Expanded(
+            child: Text(
+              connecting
+                  ? '正在建立蓝牙链路…'
+                  : '未发现 RTU 设备，请确认设备已上电并靠近手机后重新搜索',
+              style: RtuTextStyles.hintSm.copyWith(color: _R.text3),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // .devs —— 设备行：图标 / 名称 / 地址·RSSI / 信号条 / 连接
+  // --------------------------------------------------------------------------
+  Widget _buildDeviceRow(Map<String, dynamic> device) {
+    final address = device['address']?.toString() ?? '';
+    final name = (device['name']?.toString().trim().isNotEmpty == true)
+        ? device['name'].toString()
+        : 'RTU 设备';
+    final rssi = device['rssi'];
+    final rssiText = (rssi == null || rssi.toString().isEmpty)
+        ? '--'
+        : rssi.toString();
+    return Container(
+      margin: const EdgeInsets.only(bottom: RtuTokens.gapLg),
+      padding: const EdgeInsets.all(RtuTokens.rowPadding),
+      decoration: BoxDecoration(
+        color: _R.surface,
+        border: Border.all(color: _R.line),
+        borderRadius: RtuTokens.brDevice,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: RtuTokens.iconTile,
+            height: RtuTokens.iconTile,
+            decoration: BoxDecoration(
+              color: _R.brandL,
+              borderRadius: RtuTokens.brIconTileLg,
+            ),
+            child: Center(child: _Icons.svg('rtu', size: 18, color: _R.brand)),
+          ),
+          const SizedBox(width: RtuTokens.gapXxl),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: RtuTextStyles.deviceName.copyWith(color: _R.text),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  address.isEmpty ? '--' : '$address · $rssiText dBm',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: RtuTextStyles.deviceMeta.copyWith(color: _R.text3),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: RtuTokens.gapMd),
+          _buildSignalBars(rssi),
+          const SizedBox(width: RtuTokens.gapMd),
+          _buildConnectButton(device),
+        ],
+      ),
+    );
+  }
+
+  /// .sig —— 4 根信号柱，按 RSSI 点亮：≥-60 满格绿 / ≥-70 三格绿 / ≥-80 黄 / 其余红
+  Widget _buildSignalBars(dynamic rssi) {
+    final value = rssi is num
+        ? rssi.toInt()
+        : int.tryParse(rssi?.toString() ?? '');
+    final level = value == null
+        ? 0
+        : value >= -60
+        ? 4
+        : value >= -70
+        ? 3
+        : value >= -80
+        ? 2
+        : 1;
+    final active = level >= 3
+        ? _R.ok
+        : level == 2
+        ? _R.warn
+        : _R.err;
+    const heights = <double>[4, 7, 10, 13];
+    return SizedBox(
+      height: RtuTokens.signalBarHeight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          for (var i = 0; i < heights.length; i++) ...[
+            if (i > 0) const SizedBox(width: 2),
+            Container(
+              width: RtuTokens.signalBarWidth,
+              height: heights[i],
+              decoration: BoxDecoration(
+                color: i < level ? active : _R.line2,
+                borderRadius: BorderRadius.circular(1),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConnectButton(Map<String, dynamic> device) {
+    final radius = BorderRadius.circular(RtuTokens.radiusInput);
+    return Material(
+      color: _R.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: radius,
+        side: BorderSide(color: _R.brand),
+      ),
+      child: InkWell(
+        borderRadius: radius,
+        onTap: (_busy || _status == '连接中')
+            ? null
+            : () => _connectScannedDevice(device),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          child: Text(
+            '连接',
+            style: RtuTextStyles.buttonSm.copyWith(
+              color: _R.brand,
+              fontSize: 12,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // .sec / .card / .kv —— 连接状态与手动连接（对应原弹窗中的同组功能）
+  // --------------------------------------------------------------------------
+  Widget _buildSectionTitle(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: RtuTokens.sectionGap,
+        bottom: RtuTokens.gapLg,
+      ),
+      child: Text(
+        text,
+        style: RtuTextStyles.sectionTitle.copyWith(color: _R.text2),
+      ),
+    );
+  }
+
+  Widget _buildCard(List<Widget> children) {
+    return Container(
+      padding: RtuTokens.cardInsets,
+      decoration: BoxDecoration(
+        color: _R.surface,
+        border: Border.all(color: _R.line),
+        borderRadius: RtuTokens.brCard,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      ),
+    );
+  }
+
+  /// .kv —— 键值行，最后一行不带分隔线。
+  Widget _buildKvRow(String label, String value, {bool last = false}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        border: last
+            ? null
+            : Border(bottom: BorderSide(color: _R.line, width: 1)),
+      ),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: RtuTextStyles.keyValue.copyWith(color: _R.text3),
+          ),
+          const Spacer(),
+          Flexible(
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+              style: RtuTextStyles.keyValueStrong.copyWith(color: _R.text),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 原弹窗首行的「已连接 xxx / 蓝牙未连接 + 状态」信息，现落在页面底部卡片里。
+  Widget _buildLinkStatusCard() {
+    final basic = _basic ?? const <String, dynamic>{};
+    final address = _addressController.text.trim();
+    final connected = _connected;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildSectionTitle('连接状态'),
+        _buildCard([
+          _buildKvRow('状态', _status),
+          _buildKvRow(
+            '设备',
+            (basic['deviceName']?.toString().trim().isNotEmpty == true)
+                ? basic['deviceName'].toString()
+                : '-',
+          ),
+          _buildKvRow('地址', address.isEmpty ? '-' : address, last: !connected),
+          if (connected) ...[
+            const SizedBox(height: RtuTokens.gapXl),
+            _buildDangerButton(),
+          ],
+        ]),
+      ],
+    );
+  }
+
+  /// .btn.dg —— 断开蓝牙（等价于原弹窗里的「断开蓝牙」）
+  Widget _buildDangerButton() {
+    return SizedBox(
+      height: RtuTokens.buttonHeight,
+      child: Material(
+        color: _R.errL,
+        borderRadius: RtuTokens.brButton,
+        child: InkWell(
+          borderRadius: RtuTokens.brButton,
+          onTap: _busy ? null : () => _disconnect(),
+          child: Center(
+            child: Text(
+              '断开蓝牙',
+              style: RtuTextStyles.button.copyWith(color: _R.err),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 原弹窗中的「手动输入地址 + 手动连接」，未连接时显示。
+  Widget _buildManualConnectCard() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildSectionTitle('手动连接'),
+        _buildCard([
+          TextField(
+            controller: _addressController,
+            textCapitalization: TextCapitalization.characters,
+            decoration: const InputDecoration(
+              hintText: '输入以 15 开头的 12 位蓝牙地址',
+            ),
+          ),
+          const SizedBox(height: RtuTokens.gapXl),
+          ElevatedButton(
+            onPressed: _busy ? null : () => _connect(),
+            child: const Text('手动连接'),
+          ),
+        ]),
+      ],
+    );
+  }
+
+  /// 关闭蓝牙页：停掉后台扫描并回到主界面（原弹窗由 Navigator.pop 收尾）。
+  void _backToMainPage() {
+    unawaited(_call('stopScan'));
+    setState(() {
+      _currentScreen = 'home';
+      _devices.clear();
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // .toast —— 底部轻提示（两个界面共用，260ms 淡入淡出）
+  // --------------------------------------------------------------------------
+  Widget _buildToast() {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 96,
+      child: IgnorePointer(
+        child: Center(
+          child: AnimatedOpacity(
+            opacity: _toastVisible ? 1 : 0,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth:
+                    MediaQuery.sizeOf(context).width - RtuTokens.pageInset * 4,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+              decoration: BoxDecoration(
+                color: AppColors.rtuToast,
+                borderRadius: RtuTokens.brChip,
+              ),
+              child: Text(
+                _toastMessage,
+                textAlign: TextAlign.center,
+                style: RtuTextStyles.toast.copyWith(color: _R.surface),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // 交互
+  // --------------------------------------------------------------------------
+
+  /// 进入蓝牙页后自动搜索一次，对应原型默认的「正在搜索附近 RTU 设备…」。
+  /// 与弹窗时代一致：只有用户主动打开该页才会触发权限申请与扫描。
+  void _scheduleAutoScan() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _currentScreen == 'bt') _startConnectScan();
+    });
+  }
+
+  /// 权限与原生扫描调用与 `_scan()` 保持一致，仅去掉模态弹窗，改为就地刷新列表。
+  Future<void> _startConnectScan() async {
+    if (_busy || _status == '连接中') return;
+    if (Platform.isAndroid) {
+      final statuses = await [
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+        Permission.locationWhenInUse,
+      ].request();
+      final sdk = (await DeviceInfoPlugin().androidInfo).version.sdkInt;
+      final required = sdk >= 31
+          ? [
+              statuses[Permission.bluetoothScan],
+              statuses[Permission.bluetoothConnect],
+            ]
+          : [statuses[Permission.locationWhenInUse]];
+      if (required.any(
+        (status) =>
+            status == null || status.isPermanentlyDenied || status.isDenied,
+      )) {
+        _showToast('请允许附近设备/位置权限后再搜索');
+        return;
+      }
+    }
+    if (!mounted) return;
+    setState(() => _devices.clear());
+    await _call('startScan', {'durationMs': 30000});
+    if (!mounted) return;
+    _showToast('已开始搜索附近 RTU 设备');
+  }
+
+  Future<void> _connectScannedDevice(Map<String, dynamic> device) async {
+    final address = device['address']?.toString() ?? '';
+    if (address.isEmpty) {
+      _showToast('该设备没有可用的蓝牙地址');
+      return;
+    }
+    await _call('stopScan');
+    await _connect(address);
+    if (!mounted || !_connected) return;
+    final name = device['name']?.toString().trim() ?? '';
+    setState(() => _currentScreen = 'home');
+    _showToast('已连接 ${name.isEmpty ? 'RTU 设备' : name}');
+  }
+}
+
+/// 概览页「实时数据」卡片的数据载体。
+///
+/// 只负责把页面已有的遥测字段（水位 / 水深 / 表面流速 / 瞬时流量）
+/// 转成「数值 + 单位」的展示形式，不引入任何新的数据来源。
+class _RealtimeMetric {
+  _RealtimeMetric(this.label, dynamic rawValue, this.unit)
+    : value = (rawValue == null || rawValue.toString().trim().isEmpty)
+          ? '-'
+          : rawValue.toString();
+
+  final String label;
+  final String value;
+  final String unit;
 }
 
 class _NetworkControllers {

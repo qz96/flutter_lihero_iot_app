@@ -85,6 +85,8 @@ class MorePage extends HookConsumerWidget {
                     icon: Icons.sensors,
                     path: '/rtu',
                   ),
+                  subtitle: '蓝牙直连 · 现场调试',
+                  accent: true,
                   onTap: () => context.push('/rtu'),
                 ),
                 Divider(

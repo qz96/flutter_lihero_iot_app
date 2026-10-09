@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="IbSDrXC4xVnMqNEfbiLIf6">
+<head data-page-node-id="GZHsBCF27pyVVe9hIqF7EZ">
+<meta charset="UTF-8" data-page-node-id="Ag5QScuGobPpGEjP3O6thk">
+<meta name="viewport" content="width=device-width,initial-scale=1" data-page-node-id="7TiuCdywgpnhjxurvvNUfI">
+<title>力合 RTU 手机 APP · 交互原型</title>
+<style>
+:root{
+  --bg:#EDF1F6; --surface:#FFFFFF; --surface-2:#F6F8FB; --surface-3:#EDF1F7;
+  --text:#16202E; --text-2:#5C6B7E; --text-3:#93A1B3;
+  --line:#E3E9F1; --line-2:#D2DBE6;
+  --brand:#0A6FD8; --brand-d:#04509F; --brand-l:#E8F1FC; --brand-l2:#CFE2F8;
+  --cyan:#0EAFBE; --cyan-l:#E2F6F8;
+  --ok:#10A56A; --ok-l:#E4F6ED;
+  --warn:#E08A00; --warn-l:#FDF2DF;
+  --err:#E04B4B; --err-l:#FCEAEA;
+  --r:14px;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,"SF Mono",Consolas,"Roboto Mono",monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[data-ic]{display:inline-flex;width:16px;height:16px;flex:0 0 auto;vertical-align:-3px}
+html,body{margin:0}
+body{background:var(--bg);font-family:var(--sans);color:var(--text);font-size:14px;line-height:1.55}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+
+.wrap{display:flex;gap:34px;align-items:flex-start;justify-content:center;padding:34px 26px 60px;flex-wrap:wrap}
+
+/* ============ 左侧说明栏 ============ */
+.side{width:288px;flex:0 0 288px}
+.side h1{font-size:19px;font-weight:700;letter-spacing:-.2px;margin:0 0 6px}
+.side .tagline{color:var(--text-2);font-size:12.5px;margin:0 0 18px;line-height:1.7}
+.side .grp{font-size:11px;font-weight:700;letter-spacing:.9px;color:var(--text-3);margin:20px 0 8px;text-transform:uppercase}
+.navbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:7px;font-family:inherit;font-size:13px;color:var(--text);cursor:pointer;transition:.15s}
+.navbtn:hover{border-color:var(--brand-l2);background:#FBFDFF;transform:translateX(2px)}
+.navbtn.on{border-color:var(--brand);background:var(--brand-l);color:var(--brand-d);font-weight:600}
+.navbtn .k{width:20px;height:20px;flex:0 0 20px;border-radius:6px;background:var(--surface-3);color:var(--text-2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.navbtn.on .k{background:var(--brand);color:#fff}
+.navbtn em{font-style:normal;color:var(--text-3);font-size:11.5px;margin-left:auto;white-space:nowrap}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:12.5px;color:var(--text-2);line-height:1.75;margin-top:16px}
+.note b{color:var(--text);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.legend span{font-size:11.5px;padding:3px 9px;border-radius:20px;background:var(--surface-3);color:var(--text-2)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
+
+/* ============ 手机 ============ */
+.stage{flex:0 0 auto}
+.phone{width:392px;height:832px;background:#0E1721;border-radius:48px;padding:11px;box-shadow:0 30px 70px rgba(14,23,33,.26),0 2px 6px rgba(14,23,33,.16)}
+.pin{position:relative;height:100%;background:var(--surface-2);border-radius:38px;overflow:hidden;display:flex;flex-direction:column}
+.notch{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:74px;height:20px;background:#0E1721;border-radius:12px;z-index:60}
+
+.sysbar{height:36px;flex:0 0 36px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:11.5px;font-weight:600;color:var(--text);background:var(--surface-2);z-index:50}
+.sysbar .r{display:flex;align-items:center;gap:5px}
+.sysbar svg{width:13px;height:13px}
+
+.screen{display:none;flex-direction:column;flex:1;min-height:0}
+.screen.active{display:flex}
+
+.hd{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:6px 14px 10px;background:var(--surface-2)}
+.hd .ttl{font-size:16px;font-weight:700;letter-spacing:-.2px;line-height:1.2}
+.hd .sub{font-size:10.5px;color:var(--text-3);margin-top:2px;letter-spacing:.2px}
+.hd .rt{margin-left:auto;display:flex;align-items:center;gap:8px}
+.back{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-2);flex:0 0 30px}
+.back svg{width:16px;height:16px}
+
+.body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 14px 22px;scrollbar-width:thin}
+.body::-webkit-scrollbar{width:4px}
+.body::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:4px}
+
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--ok-l);color:var(--ok);white-space:nowrap}
+.chip.g{background:var(--surface-3);color:var(--text-2)}
+.chip.w{background:var(--warn-l);color:var(--warn)}
+.chip.e{background:var(--err-l);color:var(--err)}
+.chip.b{background:var(--brand-l);color:var(--brand-d)}
+.chip .d{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:11px}
+.card.tight{padding:11px 13px}
+.sec{display:flex;align-items:center;justify-content:space-between;margin:16px 2px 9px}
+.sec h3{font-size:12px;font-weight:700;color:var(--text-2);letter-spacing:.4px;margin:0}
+.sec a{font-size:11.5px;color:var(--brand);text-decoration:none;font-weight:600;cursor:pointer}
+
+/* 概览大卡 */
+.hero{background:linear-gradient(135deg,#0A6FD8 0%,#0B86C9 55%,#0EAFBE 100%);border-radius:18px;padding:16px 17px 15px;color:#fff;margin-bottom:12px;box-shadow:0 10px 22px rgba(10,111,216,.24)}
+.hero .top{display:flex;align-items:flex-start;gap:12px}
+.hero .nm{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.hero .meta{font-size:11px;opacity:.82;margin-top:4px;letter-spacing:.2px}
+.hero .st{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;background:rgba(255,255,255,.18);padding:4px 9px;border-radius:20px;backdrop-filter:blur(4px)}
+.hero .st .d{width:6px;height:6px;border-radius:50%;background:#7BF3B4;box-shadow:0 0 0 3px rgba(123,243,180,.28)}
+.hero .metrics{display:flex;gap:9px;margin-top:14px}
+.hero .m{flex:1;background:rgba(255,255,255,.14);border-radius:11px;padding:9px 10px}
+.hero .m .k{font-size:10px;opacity:.85;letter-spacing:.3px}
+.hero .m .v{font-size:16px;font-weight:700;margin-top:2px;letter-spacing:-.3px}
+.hero .m .v s{font-size:10px;font-weight:500;opacity:.85;text-decoration:none;margin-left:1px}
+.bar{height:5px;border-radius:5px;background:rgba(255,255,255,.22);margin-top:12px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:5px;background:#8FF3C0}
+.hero .foot{display:flex;justify-content:space-between;font-size:10.5px;opacity:.88;margin-top:7px}
+
+/* 快捷操作 */
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.qbtn{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:11px 4px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font-family:inherit;font-size:10.5px;color:var(--text-2);font-weight:600;transition:.15s}
+.qbtn:hover{border-color:var(--brand-l2);color:var(--brand);background:#FBFDFF}
+.qbtn .ic{width:30px;height:30px;border-radius:10px;background:var(--brand-l);color:var(--brand);display:flex;align-items:center;justify-content:center}
+.qbtn .ic svg{width:16px;height:16px}
+.qbtn.cy .ic{background:var(--cyan-l);color:#0A8C99}
+.qbtn.wr .ic{background:var(--warn-l);color:var(--warn)}
+
+/* 数值网格 */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+.mbox .k{font-size:10.5px;color:var(--text-3);display:flex;align-items:center;gap:5px}
+.mbox .v{font-size:19px;font-weight:700;letter-spacing:-.5px;margin-top:3px}
+.mbox .v s{font-size:10.5px;font-weight:500;color:var(--text-3);text-decoration:none;margin-left:2px}
+.mbox .v.dim{font-size:15px}
+.spark{margin-top:7px;height:22px;display:block;width:100%}
+.spark path{fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* 行项目 */
+.row{display:flex;align-items:center;gap:11px;padding:12px 13px;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:.15s}
+.row:hover{border-color:var(--brand-l2);background:#FBFDFF}
+.row .ic{width:33px;height:33px;flex:0 0 33px;border-radius:10px;background:var(--brand-l);color:var(--brand);display:flex;align-items:center;justify-content:center}
+.row .ic svg{width:17px;height:17px}
+.row .tx{flex:1;min-width:0}
+.row .tx .a{font-size:13.5px;font-weight:600;letter-spacing:-.1px}
+.row .tx .b{font-size:11px;color:var(--text-3);margin-top:1px}
+.row .val{font-size:12px;color:var(--text-2);font-weight:600;white-space:nowrap}
+.row .chev{width:15px;height:15px;color:var(--text-3);flex:0 0 15px}
+
+/* 表单 */
+.field{display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--line)}
+.field:last-child{border-bottom:none}
+.field .lb{font-size:13px;color:var(--text);flex:0 0 auto;white-space:nowrap}
+.field .lb s{display:block;font-size:10.5px;color:var(--text-3);text-decoration:none;font-weight:400;margin-top:1px;white-space:normal}
+.field .sp{margin-left:auto;display:flex;align-items:center;gap:7px}
+.inp{border:1px solid var(--line-2);background:var(--surface-2);border-radius:9px;padding:7px 11px;font-family:inherit;font-size:13px;color:var(--text);text-align:right;width:132px;outline:none;font-variant-numeric:tabular-nums}
+.inp:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px var(--brand-l)}
+.inp.wide{width:180px;text-align:left}
+.inp.mini{width:70px}
+.unit{font-size:11.5px;color:var(--text-3);flex:0 0 auto}
+.pick{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--brand);font-weight:600}
+.pick svg{width:14px;height:14px}
+
+.sw{width:44px;height:26px;border-radius:20px;background:var(--line-2);position:relative;cursor:pointer;transition:.2s;flex:0 0 44px;border:none;padding:0}
+.sw i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.2s}
+.sw.on{background:var(--brand)}
+.sw.on i{left:21px}
+
+.seg{display:flex;background:var(--surface-3);border-radius:11px;padding:3px;gap:2px}
+.seg button{flex:1;border:none;background:transparent;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--text-2);padding:7px 4px;border-radius:9px;cursor:pointer;transition:.15s;white-space:nowrap}
+.seg button.on{background:var(--surface);color:var(--brand-d);box-shadow:0 1px 3px rgba(16,32,46,.09)}
+
+.btns{display:flex;gap:9px;margin-top:4px}
+.btn{flex:1;border:none;border-radius:12px;padding:13px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;background:var(--brand);color:#fff;transition:.15s;letter-spacing:.2px}
+.btn:hover{background:var(--brand-d)}
+.btn.gh{background:var(--surface);color:var(--text);border:1px solid var(--line-2)}
+.btn.gh:hover{background:var(--surface-2)}
+.btn.dg{background:var(--err-l);color:var(--err)}
+.btn.sm{padding:10px;font-size:12.5px;border-radius:10px}
+
+.tabbar{flex:0 0 auto;display:flex;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:7px 4px 8px}
+.tabbar button{flex:1;border:none;background:none;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text-3);font-size:10px;font-weight:600;padding:2px 0}
+.tabbar svg{width:21px;height:21px}
+.tabbar [data-ic]{width:21px;height:21px}
+.alert [data-ic]{width:16px;height:16px;flex:0 0 16px;margin-top:1px}
+.pick [data-ic]{width:14px;height:14px}
+.radar .core [data-ic]{width:24px;height:24px}
+.tabbar button.on{color:var(--brand)}
+
+/* 断面图 */
+.section-svg{display:block;width:100%;height:auto}
+.ax{font-size:9.5px;fill:var(--text-3)}
+.vl{font-size:10px;font-weight:700;fill:var(--brand-d)}
+.vl2{font-size:10px;font-weight:700;fill:#0A8C99}
+
+/* 列表数据 */
+.dlist{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.dhead,.drow{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:6px;padding:9px 12px;font-size:11px}
+.dhead{background:var(--surface-3);color:var(--text-3);font-weight:700;letter-spacing:.3px}
+.drow{border-top:1px solid var(--line);font-variant-numeric:tabular-nums;color:var(--text-2)}
+.drow b{color:var(--text);font-weight:600}
+.drow.bad{background:#FFF9F9}
+
+/* 传感器 */
+.sens{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.sens:last-child{border-bottom:none}
+.sens .d{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:0 0 8px;box-shadow:0 0 0 3px var(--ok-l)}
+.sens .d.off{background:var(--text-3);box-shadow:0 0 0 3px var(--surface-3)}
+.sens .nm{font-size:13px;font-weight:600}
+.sens .ds{font-size:10.5px;color:var(--text-3);margin-top:1px}
+
+/* 报警条 */
+.alert{display:flex;gap:10px;align-items:flex-start;border-radius:12px;padding:11px 13px;margin-bottom:11px;font-size:12px;line-height:1.6}
+.alert.ok{background:var(--ok-l);color:#0A7A4E}
+.alert.w{background:var(--warn-l);color:#8A5A00}
+.alert svg{width:16px;height:16px;flex:0 0 16px;margin-top:1px}
+.alert b{font-weight:700}
+
+/* 弹窗 */
+.mask{position:absolute;inset:0;background:rgba(14,23,33,.42);display:none;align-items:center;justify-content:center;z-index:80;padding:26px;backdrop-filter:blur(2px)}
+.mask.on{display:flex}
+.dlg{background:var(--surface);border-radius:18px;padding:18px 17px 15px;width:100%;box-shadow:0 20px 50px rgba(14,23,33,.28)}
+.dlg h4{margin:0 0 4px;font-size:15px;font-weight:700}
+.dlg p{margin:0 0 14px;font-size:12.5px;color:var(--text-2);line-height:1.65}
+.dlg .fld{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.dlg .fld .lb{font-size:12px;color:var(--text-2);flex:0 0 62px}
+.dlg .fld .inp{width:100%;text-align:left;flex:1}
+.dlg .btns{margin-top:14px}
+
+.toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%) translateY(8px);background:rgba(22,32,46,.9);color:#fff;font-size:12px;padding:9px 16px;border-radius:20px;opacity:0;transition:.25s;pointer-events:none;z-index:90;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* 蓝牙搜索动画 */
+.radar{position:relative;width:110px;height:110px;margin:8px auto 16px;display:flex;align-items:center;justify-content:center}
+.radar .core{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0A6FD8,#0EAFBE);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 8px 20px rgba(10,111,216,.3);z-index:2}
+.radar .core svg{width:26px;height:26px}
+.radar i{position:absolute;border-radius:50%;border:1px solid rgba(10,111,216,.4);animation:pulse 2.4s ease-out infinite}
+.radar i:nth-child(1){width:74px;height:74px;animation-delay:0s}
+.radar i:nth-child(2){width:74px;height:74px;animation-delay:.8s}
+.radar i:nth-child(3){width:74px;height:74px;animation-delay:1.6s}
+@keyframes pulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.5);opacity:0}}
+
+.devs{display:flex;align-items:center;gap:12px;padding:13px;background:var(--surface);border:1px solid var(--line);border-radius:13px;margin-bottom:9px}
+.devs .ic{width:36px;height:36px;border-radius:11px;background:var(--brand-l);color:var(--brand);display:flex;align-items:center;justify-content:center;flex:0 0 36px}
+.devs .ic svg{width:18px;height:18px}
+.devs .tx{flex:1;min-width:0}
+.devs .tx .a{font-size:13.5px;font-weight:700}
+.devs .tx .b{font-size:10.5px;color:var(--text-3);font-family:var(--mono);margin-top:2px}
+.devs .go{border:1px solid var(--brand);color:var(--brand);background:var(--surface);font-family:inherit;font-size:12px;font-weight:700;padding:6px 14px;border-radius:9px;cursor:pointer}
+.devs .go:hover{background:var(--brand);color:#fff}
+.sig{display:flex;align-items:flex-end;gap:2px;height:13px;flex:0 0 auto}
+.sig i{width:3px;background:var(--line-2);border-radius:1px}
+.sig i:nth-child(1){height:4px}.sig i:nth-child(2){height:7px}.sig i:nth-child(3){height:10px}.sig i:nth-child(4){height:13px}
+.sig.s3 i:nth-child(-n+3){background:var(--ok)}
+.sig.s1 i:nth-child(1){background:var(--warn)}
+
+.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--text-3)}
+.kv .v{font-weight:600;font-variant-numeric:tabular-nums}
+
+@media(max-width:900px){
+  .wrap{padding:18px 12px 40px;gap:20px}
+  .side{width:100%;flex:1 1 100%;order:2}
+  .stage{order:1}
+}
+</style>
+</head>
+<body data-page-node-id="phm8oFmkAacN5vzBNXrCLD">
+<div class="wrap" data-page-node-id="zqQUIxgye3CZ59ILEs6Jkl">
+
+<!-- ================= 左侧说明 ================= -->
+<aside class="side" data-page-node-id="1aDhwQx6ModbiF1TR2VmQn">
+  <h1 data-page-node-id="KFXHAk14jUpUtDy2YCOlaA">RTU 手机 APP · 交互原型</h1>
+  <p class="tagline" data-page-node-id="CydttliBvlbvtEPKJPsidB">力合 LHRTU 遥测终端 · 管网 / 河道场景<br data-page-node-id="VSxerrbG5gDyisr7tNOkki">蓝牙现场调试 + 平台远程管理双通道</p>
+
+  <div class="grp" data-page-node-id="5gWKve972uHpOZ93fmdTtd">主流程 · 底部 Tab</div>
+  <button class="navbtn" data-go="connect" data-page-node-id="O2yX1pzrTSD5dDnMPnSviK"><span class="k" data-page-node-id="b07p7uPp3bZ0xu8HvCUlhT">0</span>蓝牙连接<em data-page-node-id="xscAAmCv7We4yIiElXBulG">现场入口</em></button>
+  <button class="navbtn" data-go="home" data-page-node-id="LDJNKQrr8GaYL4KXKVj0N2"><span class="k" data-page-node-id="E40pyCvW2jLmOUgFYZG9ZP">1</span>设备概览<em data-page-node-id="9p4pPfZA5rEdCMMVMrNyI6">一眼看全</em></button>
+  <button class="navbtn" data-go="monitor" data-page-node-id="YiFC65T920yaPh4daFXAjy"><span class="k" data-page-node-id="eTWoDbLPbLcgTBKwKHMbpb">2</span>实时监测<em data-page-node-id="ZbUmw007YFdFAXEQ5cUL69">断面 + 参数</em></button>
+  <button class="navbtn" data-go="data" data-page-node-id="JQ39ViaPKCFZEWEVTMqzIC"><span class="k" data-page-node-id="JaryiurVFsptJKUDnHU9Pm">3</span>数据与曲线<em data-page-node-id="LqXXrKWT87kBAzMcJCNu3S">查询 / 导出</em></button>
+  <button class="navbtn" data-go="settings" data-page-node-id="AytgleBCBnRLbCKatDql5F"><span class="k" data-page-node-id="B9yiSrQR3YCD2yr9nqxg4l">4</span>设置中心<em data-page-node-id="7ohu4QWazmr0fAhXpERP8H">分组下钻</em></button>
+
+  <div class="grp" data-page-node-id="QtZFpDdbpCAhJJjNXDOEDu">设置中心 · 二级页</div>
+  <button class="navbtn" data-go="s-upload" data-page-node-id="yRKd8TCTI14oMbD9ded1xg">上传配置<em data-page-node-id="D5HHz8RlKCj92mENkwdHAX">212 / MQTT</em></button>
+  <button class="navbtn" data-go="s-collect" data-page-node-id="aiUcqLlD9aRHtRfgp0nymR">采集与工作模式<em data-page-node-id="D7mjdvpuZXkAlkICWlgQGj">三种模式</em></button>
+  <button class="navbtn" data-go="s-rs485" data-page-node-id="0CgGZCiHcJLe5dvfYbaNFV">传感器与 RS485<em data-page-node-id="Bdz2I7KQ2QEYBtletDwinU">7 类设备</em></button>
+  <button class="navbtn" data-go="s-section" data-page-node-id="7kgNyaI0glPpyi47bMNrjv">断面设置<em data-page-node-id="tRfCE7Z1AY6Kfl9l8NI7gU">图形化</em></button>
+  <button class="navbtn" data-go="s-calib" data-page-node-id="VHmk3BdUefMfaDiL0oedSM">率定与系数<em data-page-node-id="H8LUOof5t8mJNfHjd5aBAL">堰槽 / abc</em></button>
+  <button class="navbtn" data-go="s-alarm" data-page-node-id="HDfP1DobMdNNawrTe0891k">报警阈值<em data-page-node-id="c52KwPiEXRKoIDRSfdDeLw">12 类报警</em></button>
+  <button class="navbtn" data-go="s-power" data-page-node-id="ioFlJ4f5co2HEF6b0CLMIP">电源与升级<em data-page-node-id="Ocroz106fxqvcdPsHT5xYU">OTA</em></button>
+  <button class="navbtn" data-go="s-maintain" data-page-node-id="KofTlJka7ypEOJ9et1Zsn9">设备维护<em data-page-node-id="bl0QitlwGpvGzwEFdcacoX">复位 / 同步</em></button>
+
+  <div class="note" data-page-node-id="VAdvNHAxPMiU6snfPVzEbh">
+    <b data-page-node-id="FrWNAOSpF0hUQUGrHb2P6r">设计主张</b><br data-page-node-id="FFUXkI4HDzTiUHWiR4qtng">
+    1. 拒绝指令操作 —— 现场人员不需要记寄存器，全图形化点选。<br data-page-node-id="kFSPNiMzrneiIGsC4GIhWO">
+    2. 一屏一职责 —— 概览看结论、监测看过程、数据看历史、设置改参数。<br data-page-node-id="f90aUCCZuabnU822cVE0t3">
+    3. 状态永远可见 —— 网络、电量、平台连接、下端设备通信常驻头部。<br data-page-node-id="mQxQJv09CwMBE7kEMp8MgP">
+    4. 危险操作要挡一下 —— 恢复出厂、复位重启、清零累计流量二次确认。<br data-page-node-id="b43PZReb6XdCTBr2hd5p2d">
+    颜色语义见下方图例。
+    <div class="legend" data-page-node-id="PDHMseqRd5FEH4TviCYZ2z">
+      <span data-page-node-id="1UFp4Y42XWW9GLd7qRLwHh"><i class="dot" style="background:#10A56A" data-page-node-id="AqEkmnxATtYfkDCKabN4C6"></i>正常</span>
+      <span data-page-node-id="uB6wybeqFU1bpHrMuXybPD"><i class="dot" style="background:#E08A00" data-page-node-id="hFChsMUkjkoRAIfxTH4GoO"></i>预警</span>
+      <span data-page-node-id="Kxjl2BsHTDN71GmuimRPmH"><i class="dot" style="background:#E04B4B" data-page-node-id="ltFhrYW72eRG6rCCJAZoGh"></i>异常</span>
+      <span data-page-node-id="qBBpNyYUPNkUoWLqtB6nMB"><i class="dot" style="background:#0A6FD8" data-page-node-id="S9tGlc9jMssmUdEdp4Lr7O"></i>可操作</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ================= 手机 ================= -->
+<div class="stage" data-page-node-id="DIDvHRKeneNggYezDSHyls">
+<div class="phone" data-page-node-id="cv7GeVbLb5fZF1JlulWEMO">
+<div class="pin" data-page-node-id="euAROEKLnFhFhqsKL4xgM0">
+  <div class="notch" data-page-node-id="EA3Za0W1CLwMvJisIpnsh0"></div>
+
+  <!-- 系统状态栏 -->
+  <div class="sysbar" data-page-node-id="Lz1gkzrhVQf04pdDRDctg6">
+    <span class="num" data-page-node-id="9VbfCOdKnDQk6dptLRJoZY">15:12</span>
+    <span class="r" data-page-node-id="bwFU258eJo3nCnT9MK6hlg">
+      <span data-ic="bt" style="width:13px;height:13px;color:#0A6FD8" data-page-node-id="75iljbF65eXQhdBLjJKU0g"></span>
+      <span class="sig s3" style="height:11px" data-page-node-id="kcEvTVq4JNh0zcGSCjcgJc"><i data-page-node-id="7IQlF7wUP7PwSnny5nLW0z"></i><i data-page-node-id="W2dMnHdpdB9v5sELzE2dGX"></i><i data-page-node-id="R6UOEkpP114Fg5TAnlBNNe"></i><i data-page-node-id="84cOmhkhFAmJlkywGpR6ch"></i></span>
+      <span data-ic="battery" style="width:15px;height:13px;color:#16202E" data-page-node-id="M1qOhY440DltKNT5GPoSFQ"></span>
+    </span>
+  </div>
+
+  <!-- ========== 0. 蓝牙连接 ========== -->
+  <section class="screen active" id="connect" data-page-node-id="Fili4x41Aq3z5iEFsbUcAl">
+    <div class="hd" data-page-node-id="YTIHErkt6iEBgTpQrhaVyp"><div data-page-node-id="SECXoM5bJ75MjpFg1gZJDe"><div class="ttl" data-page-node-id="sLNgSHtgLkdE7tnZpCTXAF">设备连接</div><div class="sub" data-page-node-id="4BxOvQN5ZPiIhadSzWrAQj">蓝牙直连 · 无需拆线接线</div></div>
+      <div class="rt" data-page-node-id="guEuC4Xs52cofWbBN8vHqf"><span class="chip b" data-page-node-id="ejJyA8dRbiokF2sliFuLLQ"><span class="d" data-page-node-id="Zz31HVpCHY2nb2tnWAWoF0"></span>蓝牙已开启</span></div>
+    </div>
+    <div class="body" data-page-node-id="6mAhIiGnLgVYrh4fpsDCEK">
+      <div class="radar" data-page-node-id="4EaHlSgwPvkw5FzDDu418Z">
+        <i data-page-node-id="0N8a2J4mzXfZmWYY8bqPFy"></i><i data-page-node-id="41N8lCPwqHr7MXWd0mJVc4"></i><i data-page-node-id="tHDMOLxY8F5ZYynfhdyGgf"></i>
+        <div class="core" data-page-node-id="YCARommYBaUolmpy0PzwOh"><span data-ic="bt" data-page-node-id="FzvsTlNH9kIdFBPrAG8CoD"></span></div>
+      </div>
+      <div style="text-align:center;font-size:12.5px;color:var(--text-2);margin-bottom:18px" data-page-node-id="SbhjrVOTXMHZgl3t6QdwT3">正在搜索附近 RTU 设备…</div>
+
+      <div class="sec" data-page-node-id="cRcc5qfBd2P4oBbTJUcuqB"><h3 data-page-node-id="C2ct1Tu0ridarTZJhWxtyT">发现的设备 3</h3><a onclick="toast('已重新搜索')" data-page-node-id="VGIzH0BXPXHuXikj1CTyBo">重新搜索</a></div>
+
+      <div class="devs" data-page-node-id="hEGmgN7tBqZmGB0lLBaHHS">
+        <div class="ic" data-page-node-id="hZhUTvsO9onAPIvs4UyNKd"><span data-ic="rtu" data-page-node-id="b41uLGvsXXJYQA90KJ6z6m"></span></div>
+        <div class="tx" data-page-node-id="2zSfDGXmZLSLby5RQQpGtd">
+          <div class="a" data-page-node-id="7ByDG8C89IELpMigO0VYkA">力合RTU-管网1号井</div>
+          <div class="b" data-page-node-id="LnClKmHjyPnxqHaBzm3B1e">A4:C1:38:F2:B9:E1 · -62 dBm</div>
+        </div>
+        <div class="sig s3" data-page-node-id="eopIYvyTzk9yYb18NQ1eOQ"><i data-page-node-id="5sYx9WqUjonhF6EHAfWBTA"></i><i data-page-node-id="iMi0kUEE84Ja2pY4AGTToQ"></i><i data-page-node-id="4zKXaG06LntXocIf3mQZXj"></i><i data-page-node-id="GClchlwHG3m7EJDtehL6W0"></i></div>
+        <button class="go" onclick="connectDev('力合RTU-管网1号井')" data-page-node-id="tLc7MpikX4HrjqsDrJwz4o">连接</button>
+      </div>
+
+      <div class="devs" data-page-node-id="zsQiC5OgyWfz2ncqbxZcMO">
+        <div class="ic" style="background:var(--cyan-l);color:#0A8C99" data-page-node-id="lcZ2qI091hbmb7M9L9WE8e"><span data-ic="rtu" data-page-node-id="qmxHHjarsWYd2uJklRRXip"></span></div>
+        <div class="tx" data-page-node-id="Ss3OlsQkNeVTJBIAFI9da5">
+          <div class="a" data-page-node-id="UUy0bcP3yJZ7zhPj4hdGVh">LHRTU200-河道2号</div>
+          <div class="b" data-page-node-id="wWS7UYr4MBXzxAX4gsWreq">A4:C1:38:7D:41:0C · -78 dBm</div>
+        </div>
+        <div class="sig s3" data-page-node-id="cXQp87CLk6K7hUflL8c7Dm"><i data-page-node-id="tyGWpNr1qSKcPFOfrHCdmB"></i><i data-page-node-id="rKRjIauyZIBfjQ4xOMpgjd"></i><i data-page-node-id="zaXux0EAqkr8zkIPNt5yKm"></i><i data-page-node-id="9sgjjlzldGOAE4gTJviVE6"></i></div>
+        <button class="go" onclick="connectDev('LHRTU200-河道2号')" data-page-node-id="aS3qhjfcLyaWaMKyH5EX4i">连接</button>
+      </div>
+
+      <div class="devs" style="opacity:.72" data-page-node-id="qzBZ2FFj7xIvJ7wZ5NysIS">
+        <div class="ic" style="background:var(--surface-3);color:var(--text-3)" data-page-node-id="yUuTtPgNx3AUq6JNKxYjK9"><span data-ic="rtu" data-page-node-id="ZzBH2F8Kgk4nrW16YwF1ky"></span></div>
+        <div class="tx" data-page-node-id="4gbTXNNIbdMzhvykY3Raxt">
+          <div class="a" data-page-node-id="iKMfM4cxp2RnbxqW4lYRwZ">LHRTU200-郴州5号</div>
+          <div class="b" data-page-node-id="UNxFj07IixDykA0SwXVNy8">A4:C1:38:1B:66:9A · -91 dBm</div>
+        </div>
+        <div class="sig s1" data-page-node-id="YAd6ahkrGGm4eks7R2BUIk"><i data-page-node-id="eBTJf3xJw9TRGy1wu7YBG8"></i><i data-page-node-id="UabiUyqn24lOcC8JNCrIJz"></i><i data-page-node-id="uXIpeOFPXyE1WvJ2ec12cP"></i><i data-page-node-id="mvKkChAZduUCfVZwDFAl1D"></i></div>
+        <button class="go" onclick="connectDev('LHRTU200-郴州5号')" data-page-node-id="6b8lPmdHGtGtRzvBr0uypd">连接</button>
+      </div>
+
+      <div class="card tight" style="margin-top:14px" data-page-node-id="3Zq01miS6TFAdLxOKekg2i">
+        <div class="kv" data-page-node-id="zXOTXIiVrswRRV60KO74tb"><span class="k" data-page-node-id="Kjl3UfUZCKaxjseHkNYUIy">已配对设备</span><span class="v" data-page-node-id="FPvBmA8xzhWgUJMiOFDCHF">2 台</span></div>
+        <div class="kv" data-page-node-id="3AFw6zqgaIvWkItb8pSVft"><span class="k" data-page-node-id="agaB1j3wR7ahKWAldDA6XR">上次连接</span><span class="v num" data-page-node-id="cfQ0W2bEvPBev8ninooAfL">今天 14:36 · 力合RTU-管网1号井</span></div>
+      </div>
+
+      <div class="btns" style="margin-top:6px" data-page-node-id="rkh1rpwzR7ZGbTNzFnksBe">
+        <button class="btn gh" onclick="toast('打开已配对设备列表')" data-page-node-id="pVvL4z2sBm2sjBjCqic7wv">从已配对中选择</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-3);text-align:center;margin:12px 0 0;line-height:1.7" data-page-node-id="PWtcnq68zPKdWDVobYMBAN">首次激活需磁吸触发蓝牙广播<br data-page-node-id="SfdqfGVF30bSonflyrR6N2">广播周期 10s，连接后自动断开平台 RPC 通道</p>
+    </div>
+  </section>
+
+  <!-- ========== 1. 设备概览 ========== -->
+  <section class="screen" id="home" data-page-node-id="KdmX50PRHDFVtF2nNAqU1Q">
+    <div class="hd" data-page-node-id="LAx3vcPlMPIoIYN8kMRUXi"><div data-page-node-id="s3xdj1TS5DDNsj0yHFXsMh"><div class="ttl" data-page-node-id="bQtVpgHvpecJ6ofpVMlhbV">设备概览</div><div class="sub" data-page-node-id="yrcGQfnlx67fwFhOHR1O0K">力合RTU-管网1号井</div></div>
+      <div class="rt" data-page-node-id="oXgQJcy0hJksjhU2fKIHbC"><span class="chip" data-page-node-id="V8rUVmjNgYR6DpJIl4B7LF"><span class="d" data-page-node-id="zivnehigfQaR1Jog3o3DhC"></span>通信正常</span></div>
+    </div>
+    <div class="body" data-page-node-id="Oel0L3Fs1rFVlslu3cGWKY">
+      <div class="hero" data-page-node-id="Z1sm9pIIyyKO7qrVR3qEty">
+        <div class="top" data-page-node-id="1JaKsE5AA7N7mG1QeKqZzu">
+          <div data-page-node-id="EFGipQSX0gEWZmIMgyJZPf">
+            <div class="nm" data-page-node-id="T0EY5Gg2RKmyU6n6qTuciH">管网1号井 · RTU</div>
+            <div class="meta" data-page-node-id="yP93rdgGW6B4rb3V8i9K2p">LHRTU 200 · SN 12345678 · 固件 V250708</div>
+          </div>
+          <div class="st" data-page-node-id="VODpGSdrIhiUmLdCTSV6HI"><span class="d" data-page-node-id="HLQ1oBZYAomjKIqMGVZg0D"></span>在线</div>
+        </div>
+        <div class="metrics" data-page-node-id="l7CilsXGUJ56mgQSzwzXuM">
+          <div class="m" data-page-node-id="nouvqX5QzLWoviKuWVvoeB"><div class="k" data-page-node-id="bRhxBDBo4IN4LC5Yazsd19">电池电量</div><div class="v num" data-page-node-id="MrAHzvInOOHiEfJSiQT2XR">87<s data-page-node-id="0j6mvQDZ0jdeGWn13LZ5lz">%</s></div></div>
+          <div class="m" data-page-node-id="vzN4ngrFGbPglaj1v2nGo2"><div class="k" data-page-node-id="HBFFu4P1kGDAMRyb7nyHRM">电池电压</div><div class="v num" data-page-node-id="Jatxgw0Goi9jtdF96YfZux">10.4<s data-page-node-id="sD34KSznespmjd0mnwIIHO">V</s></div></div>
+          <div class="m" data-page-node-id="RLIHNFumhBM38qKqBTRWpH"><div class="k" data-page-node-id="c2kPrN21RP19DKhF4O5jBm">信号强度</div><div class="v num" data-page-node-id="PRNvaf4vZNGmzo1jBvPFTX">23<s data-page-node-id="PMdumHWptmVJi9kpHWRJRG">CSQ</s></div></div>
+        </div>
+        <div class="bar" data-page-node-id="KEjqmIDdLfZWnNxA8JCgsn"><i style="width:87%" data-page-node-id="WAKM8owXfgQI3cGj4xaG4a"></i></div>
+        <div class="foot" data-page-node-id="qduS0kzExmFUDZkDapIXk9"><span data-page-node-id="9Clyox1mkdckYh2WyJJ7eN">间隔工作模式 · 采集 5min / 上传 60min</span><span data-page-node-id="lA4iYLQVkqjUpYu95AFiIL">预计剩余 46 天</span></div>
+      </div>
+
+      <div class="alert ok" data-page-node-id="ihinsh0ROYloZLvNtJXaFm">
+        <span data-ic="check" data-page-node-id="pW5JlU217GkGKWez4btvF9"></span>
+        <div data-page-node-id="DCL3nQYEcrKRmnkaF4UCgQ"><b data-page-node-id="jqAWhtVYfDFwdyuLftpDbK">设备运行正常</b>　当前水位 2.316 m，处于低水位与高水位阈值之间，无越限报警。</div>
+      </div>
+
+      <div class="sec" data-page-node-id="ytgcuDoKlcB6wNw3UqhfRZ"><h3 data-page-node-id="xTrbzFPBDqbHnV8jOb2NzW">快捷操作</h3></div>
+      <div class="quick" data-page-node-id="r5i402mIVPPvngTuPmtFln">
+        <button class="qbtn" onclick="toast('已下发立即采集指令')" data-page-node-id="OSQkc8d9FrZalBUXULCWtL"><span class="ic" data-ic="scan" data-page-node-id="UQlSACmcgHeJjt2jzEuztI"></span>立即采集</button>
+        <button class="qbtn cy" onclick="toast('已下发立即上传指令')" data-page-node-id="4oaDcwzpYmnV5CDRMrESUY"><span class="ic" data-ic="upload" data-page-node-id="q033JFandqRBJ2rkGTFG3b"></span>立即上传</button>
+        <button class="qbtn" onclick="toggleMeasure(this)" data-page-node-id="2n2K8qbHY8geQEvXKVNON2"><span class="ic" data-ic="play" data-page-node-id="TEzbEvhDB8DxnI8V2MtTr8"></span><span class="lb" data-page-node-id="6b7B311buK7XDw9GcvpkJQ">开始测量</span></button>
+        <button class="qbtn wr" onclick="openDlg('dlg-export')" data-page-node-id="E7TpHQoh98RQkmwpxXXYFp"><span class="ic" data-ic="download" data-page-node-id="LCpwrQtCNBKIfHmzQmaAam"></span>导出数据</button>
+      </div>
+
+      <div class="sec" data-page-node-id="sd2zEX8FekymbQmuksKtxl"><h3 data-page-node-id="NdgCenLYgla9HgqUreHJWi">实时数据</h3><a onclick="tabTo('monitor')" data-page-node-id="TfTudZ2z4aNC7m5l0cc0o1">查看全部 ›</a></div>
+      <div class="grid2" style="margin-bottom:9px" data-page-node-id="KZlUimppPCCFB1NUw1KN6D">
+        <div class="mbox" data-page-node-id="fdxCFz6D6OJGwDdPOkA9QJ">
+          <div class="k" data-page-node-id="mUf7FygdxKrtTuFyb8NLf2">水位</div>
+          <div class="v num" data-live="lev" data-page-node-id="2FadolOH8vvOKyZZIRxSUm">2.316<s data-page-node-id="gI6xAu075osxRDZiIIOoxc">m</s></div>
+          <svg class="spark" viewBox="0 0 120 22" preserveAspectRatio="none" data-page-node-id="M4yfwsU37ZF8faiWchE2bW"><path d="M0 15 L15 12 L30 16 L45 9 L60 11 L75 6 L90 9 L105 4 L120 7" stroke="#0A6FD8" data-page-node-id="HhdRmnRc4bVVwcnpwipwig"/></svg>
+        </div>
+        <div class="mbox" data-page-node-id="KpWMsZVSf1LCX4vKV2rILP">
+          <div class="k" data-page-node-id="atyE4JDEx0lhbWf7PIcD16">水深</div>
+          <div class="v num" data-live="dep" data-page-node-id="WHry5qmbcqCGQEHcI1KLV9">1.842<s data-page-node-id="sqkVbXSsDCBcx1sugtCeJM">m</s></div>
+          <svg class="spark" viewBox="0 0 120 22" preserveAspectRatio="none" data-page-node-id="ix5CsCuyl8BzuesVYFQkln"><path d="M0 16 L15 13 L30 17 L45 10 L60 12 L75 7 L90 10 L105 5 L120 8" stroke="#0A6FD8" data-page-node-id="unr2IlJmXE0ogS14zRLOoy"/></svg>
+        </div>
+        <div class="mbox" data-page-node-id="82CPNZnp7YmEr8lIFzCD1I">
+          <div class="k" data-page-node-id="VWNrJN4xWjh8NdTr9aI2vf">表面流速</div>
+          <div class="v num" data-live="vel" data-page-node-id="PG3BsvO2NU5Oy5MzaGk2ea">0.612<s data-page-node-id="JFp9orN52lK9MRND1ZOJdJ">m/s</s></div>
+          <svg class="spark" viewBox="0 0 120 22" preserveAspectRatio="none" data-page-node-id="TBnpr6etCGFypjReKEHi0o"><path d="M0 12 L15 15 L30 11 L45 14 L60 9 L75 13 L90 8 L105 11 L120 6" stroke="#0EAFBE" data-page-node-id="6ptzcGtgryDVWi9UK0K4HH"/></svg>
+        </div>
+        <div class="mbox" data-page-node-id="33F5skkN5CuTiEDdKEeI6P">
+          <div class="k" data-page-node-id="6J8W42wqD9OnnirxRdfDHu">瞬时流量</div>
+          <div class="v num" data-live="flow" data-page-node-id="dosPtBvwIYAvNbqACcy3Go">1.036<s data-page-node-id="Fsu1HQDdL4EFiHb5uPsDgi">m³/s</s></div>
+          <svg class="spark" viewBox="0 0 120 22" preserveAspectRatio="none" data-page-node-id="uQ70fAody0uO4KPkbj40XI"><path d="M0 14 L15 10 L30 13 L45 8 L60 11 L75 6 L90 9 L105 5 L120 8" stroke="#0EAFBE" data-page-node-id="RVFDS1TGYH6WBV82uALSAs"/></svg>
+        </div>
+      </div>
+
+      <div class="card tight" data-page-node-id="SAITmMvC6pLP81H5lc0oAO">
+        <div class="kv" data-page-node-id="S3cV1z0NLA4AzkFTybKlqs"><span class="k" data-page-node-id="vGhoZtS98qfh56riEvKr6E">平台连接状态</span><span class="v" style="color:var(--ok)" data-page-node-id="FfeAqMYFc3aCZdJtHfU4IK">已连接 · 212 协议</span></div>
+        <div class="kv" data-page-node-id="gNBAo3EYYmU4qyXWEfct4C"><span class="k" data-page-node-id="MkeuPsLvDBbbfiFAO55iYz">上次上传成功</span><span class="v num" data-page-node-id="5jWbuXV5h48kRxVFMGkbgt">今天 15:08:24</span></div>
+        <div class="kv" data-page-node-id="TbHJy1w2PYd9jR55hgWhCi"><span class="k" data-page-node-id="wIwF4mTF5u7hSkEQ2XOjUu">未上传数据</span><span class="v" data-page-node-id="4U5nAGBdPSTXQKLFZjdvUc">12 条</span></div>
+        <div class="kv" data-page-node-id="Aub4ToKtVtgw04ZLGuvEsY"><span class="k" data-page-node-id="oR6QKbC91fGTSkLXRN328H">物联网卡</span><span class="v" data-page-node-id="tlv708r5F0xg6yyQOtMY5A">89860118801234567890 · 中国移动</span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="vgGtk2By9IPQGNkf1i9CmL"><h3 data-page-node-id="aBCDy3GVpIcSjhKvye4oeN">断面与下端设备</h3><a onclick="tabTo('monitor')" data-page-node-id="AzfbAW5xKnz3Vn3QtPN8cy">断面图 ›</a></div>
+      <div class="card tight" style="padding:6px 8px 2px" data-page-node-id="uUF1D1kK8h2Y5iW182F5Cj">
+        <svg class="section-svg" viewBox="0 0 330 150" data-page-node-id="4A9FZmmcfPqSkWJ9pITsiM">
+          <defs data-page-node-id="sVhlG8EiRgH5VYINvuuWCV">
+            <linearGradient id="wg1" x1="0" y1="0" x2="0" y2="1" data-page-node-id="UwTs56OfRtRhaA4Ej7waJR">
+              <stop offset="0" stop-color="#5FB3F0" stop-opacity=".55" data-page-node-id="swPTbGMz5Am81lhN9drLg2"/>
+              <stop offset="1" stop-color="#0A6FD8" stop-opacity=".28" data-page-node-id="1JkXJMpOWIMLpKirEkcpwN"/>
+            </linearGradient>
+          </defs>
+          <polygon points="18,22 62,120 268,120 312,22" fill="#F1F5FA" stroke="#C3CFDD" stroke-width="1.2" data-page-node-id="7gcSd7CM6gopfJqpgDym6C"/>
+          <polygon points="40,68 290,68 268,120 62,120" fill="url(#wg1)" data-page-node-id="AzmgovMr0lOFtVKMTiqJoG"/>
+          <rect x="62" y="112" width="206" height="8" fill="#D9CDB8" opacity=".85" data-page-node-id="R7H8tVlCISt59iCBN6IWFE"/>
+          <line x1="40" y1="68" x2="290" y2="68" stroke="#0A6FD8" stroke-width="1.4" stroke-dasharray="5 3" data-page-node-id="THMGBEtzWzi7l9jajCYOgN"/>
+          <text class="vl" x="294" y="71" data-page-node-id="eALMIcFIdqYWdcFcF7YKes">2.316m</text>
+          <path d="M165 8 v14" stroke="#0A6FD8" stroke-width="1.2" data-page-node-id="fzEc6AEIavqB6hz0UQ9gF8"/>
+          <path d="M158 22 h14" stroke="#0A6FD8" stroke-width="1.6" stroke-linecap="round" data-page-node-id="uplVACWMelRWF6jj5Ygdik"/>
+          <path d="M155 30 a14 6 0 0 0 20 0" fill="none" stroke="#0A6FD8" stroke-width="1" opacity=".5" data-page-node-id="VFUYPtFTAIMWvY1xryjPZ4"/>
+          <text class="ax" x="165" y="6" text-anchor="middle" data-page-node-id="N1M9tjwmR0fD0zh3z9tYJ8">雷达探头</text>
+          <line x1="165" y1="22" x2="165" y2="66" stroke="#93A1B3" stroke-width=".9" stroke-dasharray="3 3" data-page-node-id="m8FAUBOo9XHviQnDOKfLxA"/>
+          <text class="ax" x="170" y="44" data-page-node-id="D6KLqYZLaeb0hxHU4lWa4Q">空高 0.474m</text>
+          <path d="M100 92 h44" stroke="#0EAFBE" stroke-width="1.8" stroke-linecap="round" marker-end="url(#ag1)" data-page-node-id="UX48b5BhEMPPkejNpsaA4b"/>
+          <defs data-page-node-id="DOVGvNm1XiKyzyYqCZJVG8"><marker id="ag1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto" data-page-node-id="aN5S80OA2dyaSsbjSjkaoe"><path d="M2 1L8 5L2 9" fill="none" stroke="#0EAFBE" stroke-width="1.6" stroke-linecap="round" data-page-node-id="yOHILexvETMoNANKhACRsn"/></marker></defs>
+          <text class="vl2" x="100" y="88" data-page-node-id="m6tTnUPRuK4BGhvU5Th9WB">0.612m/s</text>
+          <text class="ax" x="165" y="138" text-anchor="middle" data-page-node-id="5ZawPgD5aa0O77FRDTsd0W">梯形断面 · 底宽 1.20m · 边坡 1:0.5 · 淤积 0.082m</text>
+        </svg>
+      </div>
+      <div class="card tight" data-page-node-id="IHE7fCAxg3P5EUTpGekP2K">
+        <div class="sens" data-page-node-id="D4ARRZ8db0Gy2JTDmFdMfy"><span class="d" data-page-node-id="QrQ8UBihoPeP5VrpXAYhSO"></span><div style="flex:1" data-page-node-id="fvQUgU4CBgNX9pwHOIw7Fx"><div class="nm" data-page-node-id="UdJrbtItW1U28Rlql1vPuk">力合雷达流量计 LHRV-300</div><div class="ds" data-page-node-id="cnZ3ZnKT4l90EiCa9rcEl5">RS485 · 9600 · 地址 0x01 · 协议 LHLL</div></div><span class="chip" data-page-node-id="pyU2LOBgH8pNboHouneDtf">已连接</span></div>
+        <div class="sens" data-page-node-id="xATwHdLWmIrT6oMEHQRAgs"><span class="d" data-page-node-id="LISBV0t4LY0ZQAePcql5dQ"></span><div style="flex:1" data-page-node-id="uNHG4qGE7GaoVQogrJ0cLA"><div class="nm" data-page-node-id="4aHKtdWago8wxY32ddEcqC">力合雷达水位计 LHRW-200</div><div class="ds" data-page-node-id="qyy6AIKRZsNRGmCuLQfBpe">RS485 · 9600 · 地址 0x02 · 协议 LHLL</div></div><span class="chip" data-page-node-id="dilMxNs7aYARXZ1DLiVJzn">已连接</span></div>
+        <div class="sens" data-page-node-id="3Es3imHSJJ3yQrhkoUyvLk"><span class="d off" data-page-node-id="4ZnjPo8dJeoUrQRwDLJiSu"></span><div style="flex:1" data-page-node-id="F7c6KhbLWMKYS1qiVQedVp"><div class="nm" data-page-node-id="kOgKCIfTDpOUm1RcIW8QmU">航征多普勒流量计</div><div class="ds" data-page-node-id="oZmUck5SidhTGdGtKdCBnF">未检测到应答</div></div><span class="chip g" data-page-node-id="M0ZQfk33FDwAlaVBBR1jXU">未连接</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 2. 实时监测 ========== -->
+  <section class="screen" id="monitor" data-page-node-id="Kr160ZHkQT3ol9vu3udTHG">
+    <div class="hd" data-page-node-id="vPT4D9DRD2zy1d2vGW3ial">
+      <div data-page-node-id="yODcX8gVCfqfwKxabsbcd5"><div class="ttl" data-page-node-id="0xhdXJBIyaNHJQM3C2fDlD">实时监测</div><div class="sub" data-page-node-id="mfPwPDZXgQtIkjyh3at65h">雷达流量计 LHRV-300 · 15:12:38 更新</div></div>
+      <div class="rt" data-page-node-id="6gD8LTIVzkGMv0outX5s5u"><span class="chip" data-page-node-id="4figUQo9uh1sQNc9qdYA3A"><span class="d" data-page-node-id="AkuXqHN9adxrvCr2GVwdz7"></span>正常</span></div>
+    </div>
+    <div class="body" data-page-node-id="SgJh8hnL4GjksEgALFR6Cq">
+      <div class="seg" style="margin-bottom:11px" data-page-node-id="eH5yxQEydS6cVThwqGYOWO">
+        <button class="on" onclick="segPick(this,'雷达流量计')" data-page-node-id="GB6dFjqsxZ2JAyPef12WsB">雷达流量计</button>
+        <button onclick="segPick(this,'雷达水位计')" data-page-node-id="0cfMmvdvtnp02p8xhxuSwk">雷达水位计</button>
+        <button onclick="segPick(this,'多参数水质')" data-page-node-id="5tsaL01k4z9og3tbuHZGMx">多参数水质</button>
+      </div>
+
+      <div class="card" style="padding:8px 10px 4px" data-page-node-id="6lRQVgNj9sZufk6QqopA7C">
+        <svg class="section-svg" viewBox="0 0 330 168" data-page-node-id="UcTa6Qp2nQlpFtTdxLjcsy">
+          <defs data-page-node-id="w8sXOfxW92s5p9bRrVWAX2">
+            <linearGradient id="wg2" x1="0" y1="0" x2="0" y2="1" data-page-node-id="CPDdprN50bCtQzsfqEFwcX">
+              <stop offset="0" stop-color="#5FB3F0" stop-opacity=".6" data-page-node-id="BYzn8eFsOSFfixxnaPn7Iz"/>
+              <stop offset="1" stop-color="#0A6FD8" stop-opacity=".3" data-page-node-id="1loWTQg0Va7738E4NoeLQD"/>
+            </linearGradient>
+          </defs>
+          <text class="ax" x="6" y="34" data-page-node-id="XdLZAKIZRvkCrXfn64aEKn">安装高度 2.790m</text>
+          <line x1="6" y1="38" x2="300" y2="38" stroke="#C3CFDD" stroke-width=".7" stroke-dasharray="4 4" data-page-node-id="GYjTDuC4LIfCfe5XMuUB31"/>
+          <polygon points="18,42 62,132 268,132 312,42" fill="#F1F5FA" stroke="#C3CFDD" stroke-width="1.2" data-page-node-id="trGxaCabpoPsm1R5sjJt8a"/>
+          <polygon points="42,84 288,84 268,132 62,132" fill="url(#wg2)" data-page-node-id="2VhrOYua9MhjAzqQBC5iwD"/>
+          <rect x="62" y="124" width="206" height="8" fill="#D9CDB8" opacity=".85" data-page-node-id="iz0gMifRryZAmOgSB1paxX"/>
+          <line x1="42" y1="84" x2="288" y2="84" stroke="#0A6FD8" stroke-width="1.5" stroke-dasharray="6 3" data-page-node-id="FeZG2EWBBmINDOdpQQeQAT"/>
+          <text class="vl" x="286" y="79" text-anchor="end" data-page-node-id="a69g2rOmKuG7oB6EPMvdmq">水位 2.316m</text>
+          <path d="M162 12 v16" stroke="#0A6FD8" stroke-width="1.3" data-page-node-id="MgoHa7or34MOrQuQCQJ1Gh"/>
+          <path d="M154 28 h16" stroke="#0A6FD8" stroke-width="1.8" stroke-linecap="round" data-page-node-id="mheGJdB1ifRQgKrigwZMfc"/>
+          <path d="M151 37 a15 6 0 0 0 22 0" fill="none" stroke="#0A6FD8" stroke-width="1" opacity=".45" data-page-node-id="17HigEXFXjci1ZcRHaxqtB"/>
+          <path d="M146 46 a20 8 0 0 0 32 0" fill="none" stroke="#0A6FD8" stroke-width="1" opacity=".25" data-page-node-id="6HYPI68BiKs2nHxrAaytlJ"/>
+          <text class="ax" x="162" y="10" text-anchor="middle" data-page-node-id="w3BUQluxSGG7kezjlvy740">雷达流量计 LHRV-300</text>
+          <line x1="162" y1="28" x2="162" y2="82" stroke="#93A1B3" stroke-width=".9" stroke-dasharray="3 3" data-page-node-id="0VDgpeqDPuqlcqSHm2TSyi"/>
+          <text class="ax" x="167" y="54" data-page-node-id="2nneVpf3K4PcSw0llAkkMq">空高 0.474m</text>
+          <path d="M96 106 h40" stroke="#0EAFBE" stroke-width="1.8" stroke-linecap="round" data-page-node-id="rgSRBEJPfXjks35QAncX8q"/>
+          <path d="M136 106 l-6 -3.4 v6.8 z" fill="#0EAFBE" data-page-node-id="o75zJTBTEUe0VTLi5SgeuW"/>
+          <text class="vl2" x="96" y="98" data-page-node-id="QIDwdNWzCeFYqJ9siYlgHm">表面流速 0.612 m/s</text>
+          <line x1="62" y1="132" x2="62" y2="140" stroke="#93A1B3" stroke-width=".8" data-page-node-id="L2rbzq9bG9c0u8rDVxE2gv"/>
+          <line x1="268" y1="132" x2="268" y2="140" stroke="#93A1B3" stroke-width=".8" data-page-node-id="LjX66PT2FyDQ1BslBUAkCf"/>
+          <text class="ax" x="165" y="149" text-anchor="middle" data-page-node-id="3CvF6kD6ZvfVo5uV4sdmtl">底宽 1.20m</text>
+          <text class="ax" x="6" y="164" data-page-node-id="sgGMo6b3RIGo29PAXeEU7t">梯形断面 · 边坡 1:0.5 · 过水面积 1.964 m² · 淤积厚度 0.082m</text>
+        </svg>
+      </div>
+
+      <div class="sec" data-page-node-id="qvrDtFyjvky3jXyKcu68Uo"><h3 data-page-node-id="qC2QxJlpW4ima46KiUZj1a">水文参数</h3><span style="font-size:10.5px;color:var(--text-3)" data-page-node-id="mJvM8B1jhb35E2B4EPGkMu">点击数值可直接修改率定</span></div>
+      <div class="grid2" style="margin-bottom:9px" data-page-node-id="T0VbcV4a7siW5Pg0t7IcJU">
+        <div class="mbox" data-page-node-id="t7uFJr5DDHVwHBSNGyuuDd"><div class="k" data-page-node-id="HNuSORgEOISSrnknzSCBtL">水位</div><div class="v num" data-live="lev" data-page-node-id="WXEkMGJjbyRFYsal4FIsSv">2.316<s data-page-node-id="kadpFrN5qrDUbXn9ga7xl5">m</s></div></div>
+        <div class="mbox" data-page-node-id="Nnv21gj0C2YYp6KAKHAJi3"><div class="k" data-page-node-id="5BjJ5Lb6DKiwUG1aseZFsA">水深</div><div class="v num" data-live="dep" data-page-node-id="aZF1FrTYV7xiwzjNtM5FtZ">1.842<s data-page-node-id="VlA1GsAlFIzawLXIazdgAN">m</s></div></div>
+        <div class="mbox" data-page-node-id="w0mWSpVYvdhrDUE7Jj1umV"><div class="k" data-page-node-id="vgyh1miEGjHqVN8uhYE2ad">空高</div><div class="v num" data-page-node-id="2n6qNO81xDfkWHwWJjqnRz">0.474<s data-page-node-id="ogzuO4PjFZg1knP5ZSBi3q">m</s></div></div>
+        <div class="mbox" data-page-node-id="dz6IBWq8tnDvfJ9PRZUgG7"><div class="k" data-page-node-id="GxFMIZ0YYEf3NSDvtuJDax">过水面积</div><div class="v num" data-page-node-id="HmM6JKKJU9NRLqLEdCqruh">1.964<s data-page-node-id="sxReGyoClugaJUsLbZtSx6">m²</s></div></div>
+        <div class="mbox" data-page-node-id="sFV6phXxG6FZTJxXS6O7ah"><div class="k" data-page-node-id="KTQ9O6W5fwtexhWOZYU2Pf">表面流速</div><div class="v num" data-live="vel" data-page-node-id="Ysrvz0B0wDJZP2sHOxp9ju">0.612<s data-page-node-id="9FBh9jk56cMmFSp4Hixn4U">m/s</s></div></div>
+        <div class="mbox" data-page-node-id="NDVWjdR4JIR5y0ll6GWFK9"><div class="k" data-page-node-id="P9NXRyqov937Z4XHTyGlOx">断面流速</div><div class="v num" data-page-node-id="IilHH4yJRKYdYhSEWQB1uw">0.528<s data-page-node-id="O8oseQ859s8Bvno8NjtQCd">m/s</s></div></div>
+        <div class="mbox" data-page-node-id="8a5jWJ9rTsUx6niMKT837v"><div class="k" data-page-node-id="WxIJy3LK7MW5i8THhzL3Tj">瞬时流量</div><div class="v num" data-live="flow" data-page-node-id="uhjCvVaWYaQZAKB5QtbsLo">1.036<s data-page-node-id="zpxVmVOkTFXTNpYenuk3id">m³/s</s></div></div>
+        <div class="mbox" data-page-node-id="ATu4gFV9qkHmdHOFLUXq0A"><div class="k" data-page-node-id="Y8Lphj3zCdxZpkimNKdons">时隔流量</div><div class="v num" data-page-node-id="6aPMHxAtk0P5Ad0Kty2ctg">62.2<s data-page-node-id="VGOw0PWi8PmP5zqaFRCggG">m³</s></div></div>
+        <div class="mbox" data-page-node-id="FpunvjR8nWB9KHfq6CqyNS"><div class="k" data-page-node-id="iZ2lyeo0Z1XwcnJ7Rnn93p">流速方向</div><div class="v dim" data-page-node-id="zb5u8QBeIIKuKLzMjBPPzt">正向（靠近）</div></div>
+        <div class="mbox" data-page-node-id="PY5cDxF8jz6BnwxaQducim"><div class="k" data-page-node-id="jj0ApAMmkqXpUa2B47u97G">温度</div><div class="v num" data-page-node-id="e5kCEp0JwIkeo7XpvuaSve">24.6<s data-page-node-id="X0sr0Etk8tIeWCyfIgCWqZ">℃</s></div></div>
+      </div>
+
+      <div class="sec" data-page-node-id="Mxgj4MtKziRyBXDABdsLaO"><h3 data-page-node-id="lBUUqHV7pG0Rfd02VP16Zn">姿态与传感器状态</h3></div>
+      <div class="card tight" data-page-node-id="ApsZXYDLL0eocBSD9BnFAY">
+        <div class="kv" data-page-node-id="04pjITzRvHDziTj81gnUQy"><span class="k" data-page-node-id="sHawgegUYRBm1IzOnCmzx2">横滚角 / 俯仰角 / 航向角</span><span class="v num" data-page-node-id="4SDL8uwTEYwlYM0p0FxnxI">1.5° / 50.0° / 128°</span></div>
+        <div class="kv" data-page-node-id="HgHXM13HWNRJ7Ek94eZBh1"><span class="k" data-page-node-id="12cgyIjoh1Ks0usUTAJmf1">淤积厚度</span><span class="v num" data-page-node-id="1ueZD300FFSuZb9dsg5SO8">0.082 m</span></div>
+        <div class="kv" data-page-node-id="5CAWwgpCW0VQ2KGvnHTgrQ"><span class="k" data-page-node-id="SWHzxBVqJb0mUUF1gvBK6A">流速测量方式 / 空高测量方式</span><span class="v" data-page-node-id="mEaDfUiLWTWP55PnuhBA9R">雷达 / 雷达</span></div>
+        <div class="kv" data-page-node-id="iuS99gR8RW6Z4AREMBRtEX"><span class="k" data-page-node-id="WzfLOCD2IYJR4HxU6EMGMi">大气压力</span><span class="v num" data-page-node-id="8pkbmKtzf3zEtILSIP73PC">100.8 kPa</span></div>
+        <div class="kv" data-page-node-id="4zqcvhAQyr6TknWGr1mydM"><span class="k" data-page-node-id="tBnZlUQQJNAKrJVqRM6vDZ">流速雷达 / 空高雷达 / 超声信号</span><span class="v num" data-page-node-id="YIUNb6AozwC2FTqSnXo41g">78% / 82% / —</span></div>
+        <div class="kv" data-page-node-id="mABI32mIHwGdKvG5SOMs8U"><span class="k" data-page-node-id="JnQGC7Ahp8piNGsjOj5Ern">电池电压</span><span class="v num" data-page-node-id="gLan0oxcU5QYWD5XJuL2DF">10.42 V</span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="wEMUS3Ol4FfBG2Gh5JmbKt"><h3 data-page-node-id="8MFmLwGmCCQJv1HQ5efzCi">累计流量</h3><a onclick="openDlg('dlg-zero')" data-page-node-id="EfoJHnTPCUXQuRfaFZPV5y">清零 ›</a></div>
+      <div class="card tight" data-page-node-id="oejkmIJwGtBX1GMNePNVjv">
+        <div class="kv" data-page-node-id="QX05d8iv7QjeNF8ZDBNax6"><span class="k" data-page-node-id="MERJxA0hXJ6LMoSuKlbeNF">正向累计流量</span><span class="v num" data-page-node-id="GOo9eptYIZQoJgitiHqjkE">12 843.26 m³</span></div>
+        <div class="kv" data-page-node-id="L1jPqAX0E91OmuiMznQLZN"><span class="k" data-page-node-id="vFHWMP7q6ZjfX4UdHeG6yB">反向累计流量</span><span class="v num" data-page-node-id="P0wwq0TDJPE1QejuZ0pr3r">216.44 m³</span></div>
+        <div class="kv" data-page-node-id="eGEO8LFEOGMvf6OknGpYUO"><span class="k" data-page-node-id="YF6NANZ50s2PpCfKvsvvOp">净累计流量</span><span class="v num" data-page-node-id="lHrDb2vhoFBfUjnK00ca7k">12 626.82 m³</span></div>
+        <div class="kv" data-page-node-id="BRMZlDCNDBw5eFx8oiYtuw"><span class="k" data-page-node-id="mFZ4zcysFtJo5sSlNlXbYW">绝对值累计流量</span><span class="v num" data-page-node-id="ONCZvPGgDnfQSADyoWRBae">13 059.70 m³</span></div>
+      </div>
+
+      <p style="font-size:10.5px;color:var(--text-3);text-align:center;margin:4px 0 12px" data-page-node-id="Sx1kUd1D2qh9pNR7EGK3Bw">蓝牙直连数据 · 与平台上传值可能存在一个采集周期时差</p>
+
+      <div class="btns" data-page-node-id="9QgAifj7Dcmq73bHrrvSkB">
+        <button class="btn gh" onclick="toast('已刷新实时数据')" data-page-node-id="W8EPrp30IWLImgA64a6VB8"><span data-ic="refresh" style="width:15px;height:15px;vertical-align:-2px" data-page-node-id="3fZkYXyxIIvHTfSMQDrvTw"></span> 刷新</button>
+        <button class="btn" onclick="toast('已下发立即采集并上传')" data-page-node-id="ktN5hK6SwIOuJjAGxbD4Gt">立即采集上报</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 3. 数据 ========== -->
+  <section class="screen" id="data" data-page-node-id="0wFP1oiHPBG6BjiULT0kQh">
+    <div class="hd" data-page-node-id="HP3nGIuzKvl0Zb546GYAdo"><div data-page-node-id="LJehCKw5wv8GuRCvhl8J7T"><div class="ttl" data-page-node-id="BEiHkGXwR1yev6tPkZc6jy">数据与曲线</div><div class="sub" data-page-node-id="qaw63YNwFUMP3hp0DMGhkx">本地存储 12 842 条 · 可存一年</div></div>
+      <div class="rt" data-page-node-id="isUgb5qY731fVeUtBc1q2z"><span class="chip w" data-page-node-id="igqKgkKAT3bcBUlNFDVAfS"><span class="d" data-page-node-id="MmXHDcqe82xatiSgSZ9z0e"></span>12 条待传</span></div>
+    </div>
+    <div class="body" data-page-node-id="wkdg3IMf2FzVxWRPwQwugf">
+      <div class="seg" style="margin-bottom:11px" data-page-node-id="BRhYK9Wit9AgaXQ0JXZCn9">
+        <button class="on" onclick="segPick(this,'today')" data-page-node-id="l0cMalVIjDhTMbnIPYtaTW">今日</button>
+        <button onclick="segPick(this,'近7天')" data-page-node-id="i4ZxyYiG0ZLtvIM3bLZ8YS">近 7 天</button>
+        <button onclick="segPick(this,'近30天')" data-page-node-id="38WybbKklKvZbvDc2lgeHQ">近 30 天</button>
+        <button onclick="segPick(this,'自定义')" data-page-node-id="dPx0qkvtX0DJWx5IjOCkQO">自定义</button>
+      </div>
+
+      <div class="card" style="padding:13px 12px 8px" data-page-node-id="w7Hq779SV1eRn69QMAUDNJ">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px" data-page-node-id="iZPwIHGCZalFCCXKuefnJz">
+          <span style="font-size:11px;color:var(--text-2);display:flex;align-items:center;gap:5px" data-page-node-id="iYNDR7M2FueE3Fj8x8TmYZ"><i style="width:14px;height:3px;border-radius:2px;background:#0A6FD8" data-page-node-id="kbMECWa4b6krCg8DMRYvSd"></i>水位 m</span>
+          <span style="font-size:11px;color:var(--text-2);display:flex;align-items:center;gap:5px" data-page-node-id="wEqt6fRs1dN3ocBGKBdicS"><i style="width:14px;height:0;border-top:2px dashed #0EAFBE" data-page-node-id="BGcz39dD8yXTHsuZtb4SaK"></i>瞬时流量 m³/s</span>
+        </div>
+        <svg class="section-svg" viewBox="0 0 340 172" data-page-node-id="0Q2JbcApzl7qQtgdjSUJUH">
+          <g stroke="#EDF1F7" stroke-width="1" data-page-node-id="rBJV4bPrVc5Suyg8dXGw7S">
+            <line x1="26" y1="40" x2="340" y2="40" data-page-node-id="MPeWWpKWan54U589o9sEj6"/><line x1="26" y1="70" x2="340" y2="70" data-page-node-id="j3WKlr84maJJwrZoeHiluv"/>
+            <line x1="26" y1="100" x2="340" y2="100" data-page-node-id="R6OxIX2UHiG0h5sdTaXDuC"/><line x1="26" y1="130" x2="340" y2="130" data-page-node-id="PHiJJwI7qjDLTUdjJmTSjC"/>
+          </g>
+          <g class="ax" text-anchor="end" data-page-node-id="gnkwtXfwpfv02f21s5aHBT">
+            <text x="22" y="43" data-page-node-id="lVxPEA5BdFDdoBTbai8X14">2.61</text><text x="22" y="73" data-page-node-id="IQIuCxCP4LasBUWBSV1Psb">2.51</text>
+            <text x="22" y="103" data-page-node-id="YYL2V85xQUMEBI7gn2zwAT">2.41</text><text x="22" y="133" data-page-node-id="wMC2e0XBklfQlt5sv2pB51">2.31</text>
+          </g>
+          <path d="M26 130.8 L55 124.7 L84 133.9 L113 115.6 L142 97.2 L171 109.4 L200 88.1 L229 66.7 L258 78.9 L287 57.5 L316 39.2 L340 48.3 L340 152 L26 152 Z" fill="#0A6FD8" opacity=".1" data-page-node-id="nxXRbEZVf4JjNK6i1Gic3d"/>
+          <polyline points="26,130.8 55,124.7 84,133.9 113,115.6 142,97.2 171,109.4 200,88.1 229,66.7 258,78.9 287,57.5 316,39.2 340,48.3" fill="none" stroke="#0A6FD8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="afxwds0NnwTuViLxgKUqUF"/>
+          <polyline points="26,116 55,92 84,124 113,76 142,60 171,96 200,72 229,44 258,80 287,40 316,52 340,84" fill="none" stroke="#0EAFBE" stroke-width="1.6" stroke-dasharray="5 3" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="98rxGyxe4KRWQScGlsko2u"/>
+          <circle cx="287" cy="57.5" r="3.4" fill="#fff" stroke="#0A6FD8" stroke-width="2" data-page-node-id="P9irrgeopSYE2cDFeDAEC1"/>
+          <circle cx="287" cy="40" r="3" fill="#fff" stroke="#0EAFBE" stroke-width="2" data-page-node-id="pMAVnWZrHPPnVGyqOls0zG"/>
+          <g class="ax" text-anchor="middle" data-page-node-id="KEelhhIiHX40NjRtF14Xb5">
+            <text x="26" y="166" data-page-node-id="zgYN33atwpQ40Y8qtYzdoV">08:00</text><text x="113" y="166" data-page-node-id="A5iBFCFyB9CFx5H6XRCvfR">11:00</text>
+            <text x="200" y="166" data-page-node-id="SwmY4XcG0DqTWGyQu57fKU">14:00</text><text x="287" y="166" data-page-node-id="qGfA6l8R7aWeVmFeVe8Blm">17:00</text>
+          </g>
+        </svg>
+        <div style="display:flex;gap:8px;border-top:1px solid var(--line);padding-top:9px;margin-top:4px" data-page-node-id="sVgFrt9K5WjigplpJdm9BI">
+          <div style="flex:1;text-align:center" data-page-node-id="e5xsV26q0kUuq7wLt6cYUG"><div style="font-size:10px;color:var(--text-3)" data-page-node-id="6Lkphu7Wk13hlWcvimTg8h">最高水位</div><div class="num" style="font-size:13px;font-weight:700" data-page-node-id="3m4l6azqHJljADJYPfJSBG">2.612 m</div></div>
+          <div style="flex:1;text-align:center;border-left:1px solid var(--line);border-right:1px solid var(--line)" data-page-node-id="g87VJU5Dr4HAJ2PmKHvbuB"><div style="font-size:10px;color:var(--text-3)" data-page-node-id="nlRHhthSWyTAdESFt8bPuK">最低水位</div><div class="num" style="font-size:13px;font-weight:700" data-page-node-id="CKBCOQrVf6VbjXdmJczpT8">2.286 m</div></div>
+          <div style="flex:1;text-align:center" data-page-node-id="miP36gAfdN6BCWK2IZx4ao"><div style="font-size:10px;color:var(--text-3)" data-page-node-id="YK3ihYKcVO1KAAEcQtUImM">平均流量</div><div class="num" style="font-size:13px;font-weight:700" data-page-node-id="kEcoLs5RWmXUhNCmlTLLuY">1.028 m³/s</div></div>
+        </div>
+      </div>
+
+      <div class="sec" data-page-node-id="pLZpEa8E92mHFG4B2zd0g7"><h3 data-page-node-id="tsT3RRtNBs7fNpl8gszAZg">数据记录</h3><a onclick="toast('按表导出为 Excel 文件')" data-page-node-id="Nbb6Zsy3BMAUrNwzutttOE">导出 Excel</a></div>
+      <div class="dlist" data-page-node-id="OPXZtSHBGN9ECtnKQ2rNfX">
+        <div class="dhead" data-page-node-id="NGaXjGNwUOzq1NYkpmHXTH"><span data-page-node-id="xkroeHM26zo7WHKacXoEuq">时间</span><span data-page-node-id="MDWDUe1Vx0TA6ldzYsbZxb">水位(m)</span><span data-page-node-id="ctKvanmnwEh0ayGSjCfc9G">流速(m/s)</span><span data-page-node-id="TseFbG2dkSA7T10lfjNz2y">流量(m³/s)</span></div>
+        <div class="drow" data-page-node-id="JNm040Ey9T0Dio2Jon05cF"><b data-page-node-id="Fu9LMZUJe8Jye1QecnXSI3">15:05</b><span data-page-node-id="h8RHYwcVEDszP91Ziil6YB">2.612</span><span data-page-node-id="M4sulXg9aac2I346L0EQi9">0.641</span><span data-page-node-id="pAtPK9YzhjRLBprFnzmcbY">1.152</span></div>
+        <div class="drow" data-page-node-id="DqDrdPiDkBLj3Ypy6RDHn9"><b data-page-node-id="GcZys1HzN5b5VQITSUz7Mu">14:05</b><span data-page-node-id="hZapQNHReghWJefiWVttyB">2.580</span><span data-page-node-id="ExOZ35RB9sk61dAwAPaa6a">0.628</span><span data-page-node-id="QUUR4McO0IFJGIXiXbqGFj">1.118</span></div>
+        <div class="drow" data-page-node-id="ooQpAdooX49TazLLMOnZ4C"><b data-page-node-id="gGZPDi2ZdI0lahtCexnUZI">13:05</b><span data-page-node-id="BhGz95KilXAIgAUHYdt3kY">2.556</span><span data-page-node-id="iFdSPCXJ7plFXr28lWI3EA">0.605</span><span data-page-node-id="KdGLAzSavp2vvLDuIo5748">1.041</span></div>
+        <div class="drow bad" data-page-node-id="6QT0cwhYmFRm8fTMBuKdtG"><b data-page-node-id="OenhuN2ur8kF1JFen85EhJ">12:05</b><span data-page-node-id="lXvuvenvlyTHyMmw6RduKm">—</span><span data-page-node-id="rgpe2FRu3iHuFiOaWFbHks">—</span><span data-page-node-id="Z1zYwAw4uZx02F7jhVc5jS">—</span></div>
+        <div class="drow bad" data-page-node-id="kAq9sL0wvxTqV7DleJWwUM"><b data-page-node-id="HoDMlf8Socpqa5KebJMl6r">11:05</b><span data-page-node-id="eKD1VZYnsE6AlCJB6HPmlJ">—</span><span data-page-node-id="mWH6pivFt1T03rGhz9wy0O">—</span><span data-page-node-id="hZ9HhW2cgORXp5Dc1VXezg">—</span></div>
+        <div class="drow" data-page-node-id="8pSrQa96ovJXlrbKHN69mP"><b data-page-node-id="c1jhLo8Zyuwy1ovPciiGnK">10:05</b><span data-page-node-id="1Y9h38rjEOEVDB6TQScK41">2.478</span><span data-page-node-id="PJmB6NMDtycXRoASHqxaPT">0.596</span><span data-page-node-id="aC0hDMyZliIoBNYXbVGVGu">0.996</span></div>
+        <div class="drow" data-page-node-id="Rb8NMnX7DfDZqsJ8FdW2MB"><b data-page-node-id="G7D03PEZ6nxfWCRXIUwBwf">09:05</b><span data-page-node-id="eR3bOpooTxG04m5e8cQdpq">2.452</span><span data-page-node-id="ilgNqrcbgdHz2jB01W49hN">0.588</span><span data-page-node-id="D61nkeDEsu3qkxZovFKdCt">0.971</span></div>
+      </div>
+      <p style="font-size:10.5px;color:var(--text-3);text-align:center;margin:9px 0 12px" data-page-node-id="fDBhx3FCLEWCEPi9pPfxrN">粉色行 = 网络中断期间本地暂存、待补传数据</p>
+
+      <div class="btns" style="flex-wrap:wrap" data-page-node-id="gqYOAN7LgglvJxTRPM3XAS">
+        <button class="btn gh sm" onclick="toast('手动补传已启动 · 12 条')" data-page-node-id="JJxGwUJpuKQ90mEgpWqjJw">手动补传 12 条</button>
+        <button class="btn gh sm" onclick="openDlg('dlg-del')" data-page-node-id="RHyPc8vfsbPDUUxUAiNhsP">删除数据</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 4. 设置 ========== -->
+  <section class="screen" id="settings" data-page-node-id="XO8FBeVWnyAUfgIGNroWze">
+    <div class="hd" data-page-node-id="VM72dCgWvzvr1OExWWoNmo"><div data-page-node-id="acZGv3KZKXfBTGdRKMVq9F"><div class="ttl" data-page-node-id="B8e3xdtmKujVVbtyz1BqcU">设置中心</div><div class="sub" data-page-node-id="EcqGLIZdJRBH4hMtJhkFbG">力合RTU-管网1号井 · 蓝牙已连接</div></div>
+      <div class="rt" data-page-node-id="0BQTtjnOTjpGwhoKDtCcRu"><span class="chip b" data-page-node-id="oERQG6VVz9ZXXZDbkbqqLa"><span class="d" data-page-node-id="PspJrehc9GWXqx1e7rRTGR"></span>可配置</span></div>
+    </div>
+    <div class="body" data-page-node-id="oDEmeH7QjRE93dUYWaQf0v">
+      <div class="sec" data-page-node-id="3ADbO4bwzdsofyqELgEgCU"><h3 data-page-node-id="BtySEZc7vuF1Tl0cDn0tPH">通信与上传</h3></div>
+      <div class="row" onclick="push('s-upload')" data-page-node-id="gjMjvf0iew9RtJEzlvfIAD"><span class="ic" data-ic="cloud" data-page-node-id="ukiJ1q3zZy3Pj03XLknU58"></span><div class="tx" data-page-node-id="HfDlXrxF1nfkDSTEE7iUkG"><div class="a" data-page-node-id="VhgacodEmDU86FMHwGN2UI">上传配置</div><div class="b" data-page-node-id="DS5bp7glnNJDMGCFnMDfc8">MN 号 · IP 端口 · 协议 · 一点多传</div></div><span class="val" data-page-node-id="1DCwKWy6wyK8C0eXtb2hmi">212</span><span class="chev" data-ic="chev" data-page-node-id="U53P8gI4mUZ27ywg5dKS0Q"></span></div>
+
+      <div class="sec" data-page-node-id="f8VYtkO7x9jA6T2PVNjPgi"><h3 data-page-node-id="B5JKjJvnBPOVyQfBul22PN">采集与供电</h3></div>
+      <div class="row" onclick="push('s-collect')" data-page-node-id="qbOh0OLkXMR6cgzqAHU1tt"><span class="ic" data-ic="clock" data-page-node-id="lHm4nYYFPGnEYZCRuNpGHc"></span><div class="tx" data-page-node-id="6X7XqyuZMKwAixURqYSJvo"><div class="a" data-page-node-id="AoOjnODTYhI6spefugJh63">采集与工作模式</div><div class="b" data-page-node-id="VlYjHIgurTpdrCfETCXfhp">采集 5min · 上传 60min · 上电延时 100s</div></div><span class="val" data-page-node-id="AUBChNUtTlQWqGaG9bxz1J">间隔模式</span><span class="chev" data-ic="chev" data-page-node-id="gLTALMzvFigsi0fUGrWnGE"></span></div>
+      <div class="row" onclick="push('s-power')" data-page-node-id="9Js4wg6oOZGW4rAlSQ1Y3K"><span class="ic" data-ic="battery" data-page-node-id="nRjU0NYvtDuOoJ8VvEOSQS"></span><div class="tx" data-page-node-id="jdPMW7Lyh4rQIOmrHhentd"><div class="a" data-page-node-id="vTvxeRai5HM97Xhdl5I1mB">电源与电池</div><div class="b" data-page-node-id="AyGzcxcn2Dp71IBcf554TJ">10.42 V · 电量 87% · 两路 12V 输出</div></div><span class="val" data-page-node-id="LHW37jwHCae1r8HsG8rSnt">长供电关</span><span class="chev" data-ic="chev" data-page-node-id="zZKB3t3u2HGORhgn6CwQDJ"></span></div>
+
+      <div class="sec" data-page-node-id="LW76fnF8XIm0bLPVCd7FyU"><h3 data-page-node-id="AzJKAZTcCksELk7m7oXHcb">传感器与断面</h3></div>
+      <div class="row" onclick="push('s-rs485')" data-page-node-id="xRDhxd4yLX7utC8twtLWDl"><span class="ic" data-ic="plug" data-page-node-id="Qo3avx8XCZLUQIKH0amL2X"></span><div class="tx" data-page-node-id="z30YkcXaEW2AFPQXrLQyKe"><div class="a" data-page-node-id="2kpdaRs6fx5TOANPGlN0lh">传感器与 RS485</div><div class="b" data-page-node-id="czMFnI7KAMQOCJsGn8dLD4">7 类设备协议 · 已连接 2 台</div></div><span class="val" data-page-node-id="iwU75Zl6dtouOZeAf0Q7JU">2/7</span><span class="chev" data-ic="chev" data-page-node-id="BpWCQggJpjfO98j5s4rPDq"></span></div>
+      <div class="row" onclick="push('s-section')" data-page-node-id="hZIuHGCyjC4r7aFzVOiPxB"><span class="ic" data-ic="ruler" data-page-node-id="z5WhXN00UbTYdjoaJopCRS"></span><div class="tx" data-page-node-id="xTtJfC9MaADzDu4xVLiqSD"><div class="a" data-page-node-id="J4UEiQ6qiPFRwq0eGawaFk">断面设置</div><div class="b" data-page-node-id="bdP5HkvYx3X3c0Tfc08ByR">梯形 · 底宽 1.20m · 边坡 1:0.5</div></div><span class="val" data-page-node-id="MtjHFyMioBmNR6YTq8xsU1">梯形</span><span class="chev" data-ic="chev" data-page-node-id="TAJ2LUDFkZz51jCE4nsA6D"></span></div>
+      <div class="row" onclick="push('s-calib')" data-page-node-id="p5Dga1PiXAFVx9MUYbtvm8"><span class="ic" data-ic="curve" data-page-node-id="OmslBE20JVxTGOKhjDNb95"></span><div class="tx" data-page-node-id="6ibrgGZ2eAE2ur03MlDNCB"><div class="a" data-page-node-id="CFOPjSULhHc2sTclST8ztT">率定与系数</div><div class="b" data-page-node-id="UxY9IsBmCCR8KSFEUHKlnl">堰槽类型 · 分段曲线 a/b/c</div></div><span class="val" data-page-node-id="r1nQXJl493v6FHZABHIvzp">3 段</span><span class="chev" data-ic="chev" data-page-node-id="ncyxBlA61GIcjlToxoPOAQ"></span></div>
+
+      <div class="sec" data-page-node-id="KCUIz9usz6MiwOAJe2SUhH"><h3 data-page-node-id="5LdID4yoGyrKMqVvCBBXaw">报警与维护</h3></div>
+      <div class="row" onclick="push('s-alarm')" data-page-node-id="eXVT7sgFmpTfAnIj1IS2OZ"><span class="ic" data-ic="bell" data-page-node-id="zoFGRTF2xe7oIVtdHNxVgB"></span><div class="tx" data-page-node-id="VPn4K5roQH0L63sy8MlE8j"><div class="a" data-page-node-id="PRzMNwiHIatIEeTyvdXZ7a">报警阈值</div><div class="b" data-page-node-id="j8FJGGael6ZirZ4IgkAHxi">水位 / 流速 / 流量 / 突变 / 供电</div></div><span class="val" data-page-node-id="NrymzgsyfjHhwZAUbCfsHF">已启用 9</span><span class="chev" data-ic="chev" data-page-node-id="mviLX7bY7rjhhfhyhpaZkf"></span></div>
+      <div class="row" onclick="push('s-upgrade')" data-page-node-id="sRGMOfgQf3uTUgc9pkG8jp"><span class="ic" data-ic="upload" data-page-node-id="kHOlaUoOkMDuUl6HGRqJOz"></span><div class="tx" data-page-node-id="v0n0JJnFPzRI4aD7CSxDPW"><div class="a" data-page-node-id="8WNEoAGiZDNc207KQO8yc9">固件升级</div><div class="b" data-page-node-id="MOTvaL9lBMc1k17uhI7sfT">RTU 与下端传感器 OTA</div></div><span class="val" data-page-node-id="TszjDKkxIr70Q5IiBYahls">V250708</span><span class="chev" data-ic="chev" data-page-node-id="Tl654fODjUecjG4HBDDaON"></span></div>
+      <div class="row" onclick="push('s-maintain')" data-page-node-id="ICQHzlNLdCTdhJyUsCl16t"><span class="ic" data-ic="tool" data-page-node-id="vdoYvrCYjlUhEpW7txcvng"></span><div class="tx" data-page-node-id="ppKA60JsQWqlMF1Didd7O9"><div class="a" data-page-node-id="SSZOvqvDA2qBR9it3D512R">设备维护</div><div class="b" data-page-node-id="PZmh8eaKYUdcBxDWvTlHMx">时间同步 · 复位 · 恢复出厂</div></div><span class="chev" data-ic="chev" data-page-node-id="2m812LIGqzsy0yrhZ6DHGt"></span></div>
+
+      <div class="card tight" style="margin-top:14px" data-page-node-id="E1Ddux5DubrvGhoJLzj4KD">
+        <div class="kv" data-page-node-id="ncCBeJMFtLTrMrQkG6zmqw"><span class="k" data-page-node-id="DXeNGpsVVdPGSsgHMkmySj">设备名称</span><span class="v" data-page-node-id="EUGlJvr3bbUVAWt3eVpeQl">力合RTU-管网1号井</span></div>
+        <div class="kv" data-page-node-id="qM6s1So0aC6P6c8OHHKhgE"><span class="k" data-page-node-id="hGLWDVRBVm7Lc1KYZlmGdE">蓝牙地址</span><span class="v" style="font-family:var(--mono);font-size:11.5px" data-page-node-id="4GqREflyy1uiwwmb2gLRra">A4:C1:38:F2:B9:E1</span></div>
+        <div class="kv" data-page-node-id="SuwgeoRDxp4LIVeK3AJnie"><span class="k" data-page-node-id="thQL2gCxEDjxBqdxPHVInn">设备唯一标识</span><span class="v num" data-page-node-id="bBYhIdDBlbCXlCdu28ToHh">202503140001</span></div>
+        <div class="kv" data-page-node-id="aQNoCMEDVd0LrjVmW1ut9G"><span class="k" data-page-node-id="Hyy81x8MuG4aRDFN1xNC9F">APP 版本</span><span class="v" data-page-node-id="AlHZo9yeHZFLHPFdGn2A2V">1.0.0 (250708)</span></div>
+      </div>
+      <p style="font-size:10.5px;color:var(--text-3);text-align:center;margin:10px 0 0" data-page-node-id="77rIk5gES0EIOx7fWfzWaz">蓝牙配置在本地生效；改 IP / 端口 / 报警阈值需保存后同步至设备</p>
+    </div>
+  </section>
+
+  <!-- ========== 上传配置 ========== -->
+  <section class="screen" id="s-upload" data-page-node-id="qNHQOVoZDFvgskDZ0xQCgd">
+    <div class="hd" data-page-node-id="FiuuxgJetbXaA0x7cVB6AS"><button class="back" onclick="back()" data-page-node-id="tPONfnz4FpZJPdRw63vFV5"><span data-ic="back" data-page-node-id="nq7guJJgzi9BVgw6vXO1Yj"></span></button>
+      <div data-page-node-id="hzfsnioY2XFIHHTSzXkofC"><div class="ttl" data-page-node-id="D19IZKQ9NqaIBUCjOsbscK">上传配置</div><div class="sub" data-page-node-id="PK50DMU3BpDHCPvVpm0Ehu">Write 指令 · 保存后立即同步</div></div></div>
+    <div class="body" data-page-node-id="sIEdywILOfytPb5LyhNm9g">
+      <div class="sec" data-page-node-id="SjerAXSOO31st8AGhnPODz"><h3 data-page-node-id="tCHHHLUyuSwehxizwWBYgZ">设备标识</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="LsYrGzHTLIihile6Og7RwP">
+        <div class="field" data-page-node-id="cS5ui5GYffmxxb791a3jfM"><span class="lb" data-page-node-id="z2SDP9AxcaMoyJ4zw60KyN">设备 MN 号<s data-page-node-id="aqammSY6pxGvRQQR48sJfP">平台侧唯一编号 1~27 字符</s></span><span class="sp" data-page-node-id="4emnG93k2mxhxrFwtdxvSq"><input class="inp wide" value="123.abc" data-page-node-id="wJ99srPJi1sdkHXiFMBeRA"></span></div>
+        <div class="field" data-page-node-id="Hf1Cfn6CzYxAr8F5xS71lz"><span class="lb" data-page-node-id="nZ3Uor7PSr0SuL5WuUUARW">设备地址</span><span class="sp" data-page-node-id="E7nuejt8Eg9qCKsV909tox"><input class="inp mini" value="00" data-page-node-id="pnC5wRtTbLiCMDHiTdSomb"></span></div>
+        <div class="field" data-page-node-id="XYffGc28zNVae27xLe6NOM"><span class="lb" data-page-node-id="Oa9ufkuU3C0JEIVBWkvP9O">系统编码 DevST<s data-page-node-id="TXN6r3SCHyZvDcDc5s1Vk3">00~04</s></span><span class="sp" data-page-node-id="452fQtmX7CHDGVxS8L8FUU"><div class="pick" data-page-node-id="NrBN37xBNAj6KmvbojLGXg">212 <span data-ic="chev" data-page-node-id="bEIyxyOd0fOc2mwoHrMBDs"></span></div></span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="x6SBSUzcGOuxjA0VBzZEnc"><h3 data-page-node-id="twa15dwpWT9FaU5lqwqfhw">主平台上传</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="hlLhyWu3fNMY72aPSnL5jP">
+        <div class="field" data-page-node-id="nlfKQVqAHFISZ4StuuXo7i"><span class="lb" data-page-node-id="nfeDBmr7jYGZJEnQVSdEdQ">上传协议</span><span class="sp" data-page-node-id="I0kCiDCJ75AlDU1VCdPzqK"><div class="pick" data-page-node-id="wdhnNANE6ASR8X3mhYECoM">212 水文规约 <span data-ic="chev" data-page-node-id="9ATrEIDkaZG8mkSrX3pj2w"></span></div></span></div>
+        <div class="field" data-page-node-id="rGeaig0aHHqfuVS526F8D7"><span class="lb" data-page-node-id="jxTUncUNSAUFjxPCGkCcQ0">上传 IP / 域名</span><span class="sp" data-page-node-id="i3z1LyaLoJL2TFQMGtzOUb"><input class="inp wide" value="183.61.22.108" data-page-node-id="Ukv2rfmtjtyA1Nfylfwzrn"></span></div>
+        <div class="field" data-page-node-id="POe7r1iWGEJRDdvt1gpg3G"><span class="lb" data-page-node-id="6w0DGmbl6EynN6IFHxKp4p">端口号</span><span class="sp" data-page-node-id="AkJk63jKUimCIEhe1uj1Np"><input class="inp mini" value="30000" data-page-node-id="QjUUobCWnMNf1BKNnP21lg"></span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="zMVYIBeP2jx40sD2cnDHrc"><h3 data-page-node-id="ZAQZqaN7L5n8pDR3mbbgMF">一点多传（第 2 路）</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="LLXjhokpy2uEbU3bL7Wd4u">
+        <div class="field" data-page-node-id="gaXWpMUEDobksUzkyAfllQ"><span class="lb" data-page-node-id="Iq48iUqhTpJLX9FLlzPBI2">通道开关</span><span class="sp" data-page-node-id="cWTQNar3tOsD1DlEeVBbN4"><button class="sw on" onclick="sw(this)" data-page-node-id="jw3cIwdrBZRGHnrsuAhNrd"><i data-page-node-id="flfPLPLCXFiB2BJMWaP60I"></i></button></span></div>
+        <div class="field" data-page-node-id="scsOqcWYXVC5Wz0ArmJMVX"><span class="lb" data-page-node-id="Gm0iSWjoyA9dizioUAcIuu">上传协议</span><span class="sp" data-page-node-id="vgH6840BDwndkvXRabzNeI"><div class="pick" data-page-node-id="Ts9ys7QQeO1M40fnBNGcIM">MQTT / ThingsBoard <span data-ic="chev" data-page-node-id="Hnp7IDby4x53SwHXnxCbg9"></span></div></span></div>
+        <div class="field" data-page-node-id="xivWhd8BD37MgN0LVe2GcI"><span class="lb" data-page-node-id="FH6VgzspWnNNucEQByZ854">MQTT 地址</span><span class="sp" data-page-node-id="VcQ2JPSoykKeKPIYFIUEoP"><input class="inp wide" value="cd-lot.lihero.com" data-page-node-id="pnFwUjNd42UZD8p6VICiXS"></span></div>
+        <div class="field" data-page-node-id="46AzUmLGm9zGPM1Dvmy3yN"><span class="lb" data-page-node-id="hKP5JhopRn8rXPh4yETEt4">MQTT 端口</span><span class="sp" data-page-node-id="gSyFB5kRLxrBFzZTbAn3Op"><input class="inp mini" value="1883" data-page-node-id="yFL49klBA8jMwE7yihvNGk"></span></div>
+        <div class="field" data-page-node-id="ESx1SG4EAhic0ROKUgnB3p"><span class="lb" data-page-node-id="RoF1aBSrDhMLhPDgv5oEXh">ClientID</span><span class="sp" data-page-node-id="uCW6v9LJ2SXUcF3XgE6oDp"><input class="inp wide" value="rtu_pipe_0001" data-page-node-id="s413VHBBWc3jEt3I3WzS8V"></span></div>
+        <div class="field" data-page-node-id="f9Vn3i3aI2cbPHjbzBVH7n"><span class="lb" data-page-node-id="9XDgc1t68UF7KjRyQEkGNr">用户名 / 密码</span><span class="sp" data-page-node-id="J0C7hCB9VQIqz3UBEzqCLp"><input class="inp wide" value="••••••••" data-page-node-id="CkLFB6XDHj7vHG5NLYxcEU"></span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="a0WPNBys2Q0dVcU5E64qvL"><h3 data-page-node-id="to3okxijJDN4ak6TuBPFCQ">APN 与联网</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="vyknMccWT37vbZV123A14h">
+        <div class="field" data-page-node-id="h69eBBFSDFzFI5ERBbVrVI"><span class="lb" data-page-node-id="qKsXv1M9lHuLVq3Jchh34G">物联网卡号</span><span class="sp" data-page-node-id="0TNIQ8jKi7NdFJ2mnrwzS5"><span class="val num" style="font-size:11.5px" data-page-node-id="3g73gXMX1U4jYDM6gueoX2">89860118801234567890</span></span></div>
+        <div class="field" data-page-node-id="iBAWqba2D69q9SlIQsT07q"><span class="lb" data-page-node-id="GI3gkabAbJQXUqSFGjDLQQ">运营商</span><span class="sp" data-page-node-id="3XcVkg5ldOLS1tnOodiz6P"><span class="val" data-page-node-id="HptoVoSqwHIt2Ca3RITxLN">中国移动</span></span></div>
+        <div class="field" data-page-node-id="9QBpNeQ8J22TpjYMFRrkGB"><span class="lb" data-page-node-id="0tkhi1zQak2GDQB9HID5hH">信号强度</span><span class="sp" data-page-node-id="MKSq8PFmmJPve1Y5mPOMqM"><span class="val num" data-page-node-id="eSb98NXoYxg8msjBLtiL4P">23 CSQ（良好）</span></span></div>
+      </div>
+
+      <div class="btns" style="margin-top:14px" data-page-node-id="cZ1Dw6gvQhDiuVJ4zmuL7m">
+        <button class="btn gh" onclick="toast('已读取设备当前参数')" data-page-node-id="2Sj3lbj3V89MJE0bBfSl7v">读取</button>
+        <button class="btn" onclick="toast('上传配置已写入设备')" data-page-node-id="QnA57mvsI1GcNUKmRvUeVy">保存并同步</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 采集与工作模式 ========== -->
+  <section class="screen" id="s-collect" data-page-node-id="H64pQT5BgApfP5nHxu63Rc">
+    <div class="hd" data-page-node-id="XdUD10pHFZS0BGFbCTRiHB"><button class="back" onclick="back()" data-page-node-id="6byDZfzLceShtpwpoW7vMp"><span data-ic="back" data-page-node-id="yWtdzlx8fzqoaDSp5OVrtT"></span></button>
+      <div data-page-node-id="n0Q9tEYXmGJogwOPJZjJTw"><div class="ttl" data-page-node-id="N1fnwTzg8FwSWCVPDaUzne">采集与工作模式</div><div class="sub" data-page-node-id="claxyo11Dt4GGWUOx2rKaw">采集 5 ≤ A ≤ 1440 · 上传 5 ≤ B ≤ 1440</div></div></div>
+    <div class="body" data-page-node-id="F0Ebdh2NI6utPLbK2iI50H">
+      <div class="sec" data-page-node-id="0ArtGvW8bbWKL0k83DZ1LK"><h3 data-page-node-id="mTCGG22VfS6VY3B3VNTHrL">工作模式</h3></div>
+      <div class="seg" style="margin-bottom:11px" data-page-node-id="A1GcWwMnPkKTW8rQaHKMOs">
+        <button class="on" onclick="segPick(this,'间隔工作模式')" data-page-node-id="JdtHHLFYV6ml4s73hJKQFy">间隔工作</button>
+        <button onclick="segPick(this,'长供电模式')" data-page-node-id="FN8xCaeef67L9LBnMKjaQN">长供电</button>
+        <button onclick="segPick(this,'测试模式')" data-page-node-id="2ZirXpplRwhPwXn4KsGEpr">测试模式</button>
+      </div>
+      <div class="alert w" data-page-node-id="goGfzlSbI2ReSD10WICq0N">
+        <span data-ic="info" data-page-node-id="oEV2AuvzRXBT3lou2VsX20"></span>
+        <div data-page-node-id="vhD9xWFDI6DXAuCVeWtjGv"><b data-page-node-id="6SrhOnR9gsjphx7s7P6Hra">间隔工作模式</b>：采样空闲时切断传感器供电，最省电，适合无人值守的井下长期监测。<br data-page-node-id="I4IK9c2KYAPyEl21Z1bDIr">长供电模式用于现场调试（水质探头校准等）；测试模式会快速循环采集上传，仅调试时短时使用。</div>
+      </div>
+
+      <div class="sec" data-page-node-id="I6gELrKwWqAkkyAzyZPUNO"><h3 data-page-node-id="HDFweBu5RzWCUvQHTgBNmv">周期与延时</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="Oz3EmmdgTnwl6hdHSKMX0b">
+        <div class="field" data-page-node-id="n6jAXtAHXHyCfQmeVYtQUH"><span class="lb" data-page-node-id="YqNAyQvngmUEYO9rrxniZI">采集间隔<s data-page-node-id="bhOg0aZZhF5tICr8iA6ZfG">分钟</s></span><span class="sp" data-page-node-id="BGEhSV0T3vg37rW4gMCj6C"><input class="inp mini num" value="5" data-page-node-id="ZT1s8m7mm2XCZLyPEE88QZ"><span class="unit" data-page-node-id="5AM0EB4XHLYhfqnC6iaBsx">min</span></span></div>
+        <div class="field" data-page-node-id="XMX7j8mCid22kj5n4SxCLS"><span class="lb" data-page-node-id="H7rQ45YDOi9ca4hnqpfnti">上传间隔<s data-page-node-id="rB2uhWrBCT1ay6VfW1Q8u7">分钟</s></span><span class="sp" data-page-node-id="R58uRkDmfNSGbjbVtxuv10"><input class="inp mini num" value="60" data-page-node-id="kBDDTmrQgMzcn8zPtfzCXD"><span class="unit" data-page-node-id="x0iC9EvauWtzN6jzyztKQh">min</span></span></div>
+        <div class="field" data-page-node-id="AMu6IqGCzT3pfiz4y4ufqc"><span class="lb" data-page-node-id="CGZdj8bIUW6ggaxIAtPimK">上电等待时间<s data-page-node-id="34abIa57mcTN2gP76TVrdb">传感器上电到可应答的时间</s></span><span class="sp" data-page-node-id="M2IAQBMuH2y0FBdgPwdb6J"><input class="inp mini num" value="100" data-page-node-id="FUIH9CoDp413dZv0pW4ASW"><span class="unit" data-page-node-id="FbcRiO7CpPvBPoVllPONjK">s</span></span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="s40YeDBjbuwGyrgyFCoyJb"><h3 data-page-node-id="QackhyS6Z0O5ftURKCal3W">传感器供电</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="JIArsT490iXtAxXFBAwx0f">
+        <div class="field" data-page-node-id="7XbAT3FOlp7ZgCBFWjYWb8"><span class="lb" data-page-node-id="rcpUU4hyPGeyecZzKZt9Lq">传感器保持供电<s data-page-node-id="Z6Nsd5Ak6R0LDkiXW4fAE1">PwrEn，空闲时不断电</s></span><span class="sp" data-page-node-id="DPNJ9mAEpp8OA2oOllDjiy"><button class="sw" onclick="sw(this)" data-page-node-id="VtUROaJfoWG09MNpDzF0q7"><i data-page-node-id="ZaWI1GWXTNxoekzCAbqGFD"></i></button></span></div>
+        <div class="field" data-page-node-id="ZzXmyl2mvm66PH1HBe0sQa"><span class="lb" data-page-node-id="Zt1mmX6WjCRtSri1hxE1Sq">12V 输出 1<s data-page-node-id="5GGml36SGB2EmP4Uz4xfrf">触点容量 1A</s></span><span class="sp" data-page-node-id="9owAyB9qC6o6b3t6noCNsG"><button class="sw on" onclick="sw(this)" data-page-node-id="huEHv0jj2PGnO0KE0ArkKX"><i data-page-node-id="cGaP7bNg8BdkUTVG4XqaCs"></i></button></span></div>
+        <div class="field" data-page-node-id="LZltYuKJXBtKQ00jSYppEj"><span class="lb" data-page-node-id="tq1DrVRyFRbLkH1exATCed">12V 输出 2<s data-page-node-id="BS1HhecgOdvlW32azABQYf">触点容量 1A</s></span><span class="sp" data-page-node-id="Adtp5cqovM1h4mt3YPhNXG"><button class="sw on" onclick="sw(this)" data-page-node-id="Mkez8fxm93B0qDDOSUxI1Y"><i data-page-node-id="2XL0sIquaDsKVE86d87PSF"></i></button></span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="WC2BmmH6BZjGGfzqaPzM30"><h3 data-page-node-id="SKCLTi4OKvPnXEEqqkWGva">单位</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="mkM9lLN6VdMPd8I6vgG0ZV">
+        <div class="field" data-page-node-id="feGtdYEfA97CreGw6AHByz"><span class="lb" data-page-node-id="hV1ikT5m07AYiqCfAubFUu">瞬时流量单位</span><span class="sp" data-page-node-id="LqgSpvwDa2KniHp7Nf45vU"><div class="pick" data-page-node-id="3855LasJtgM9bmIs1MifIi">m³/s <span data-ic="chev" data-page-node-id="wAe1abG3iMqFuXdUrtllPi"></span></div></span></div>
+        <div class="field" data-page-node-id="qvZP4NHVqo52cYa0HwAABU"><span class="lb" data-page-node-id="lC9NvyYXJRdQwiDaasglJz">水温单位</span><span class="sp" data-page-node-id="nlXrjYpuTAEn56yfGmMN1y"><div class="pick" data-page-node-id="De5K6h6WgvThdgq0EoEKBC">℃ <span data-ic="chev" data-page-node-id="WTZDN0YYtmTsVioWkCRVDV"></span></div></span></div>
+      </div>
+
+      <div class="btns" style="margin-top:14px" data-page-node-id="WNyItZpUpfo4Uiecj3kvZj">
+        <button class="btn gh" onclick="toast('已读取设备当前参数')" data-page-node-id="0BQuqIGEgUbskASoayr1iV">读取</button>
+        <button class="btn" onclick="toast('采集参数已写入设备')" data-page-node-id="7igzFuJXLvxzHjZZRhPuAP">保存并同步</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 传感器与 RS485 ========== -->
+  <section class="screen" id="s-rs485" data-page-node-id="xLRrMUVcRan3Oey658Xqex">
+    <div class="hd" data-page-node-id="EYbWlxWiEBDEBcSo7esXox"><button class="back" onclick="back()" data-page-node-id="ystUxk5MPOL8otr4q2t7Jg"><span data-ic="back" data-page-node-id="q9rT9DybsmIITzwv2GYkci"></span></button>
+      <div data-page-node-id="1ANbKnGdD62fjtqeaJD5vZ"><div class="ttl" data-page-node-id="6LOW1VYCtuQG3g4b52OTBm">传感器与 RS485</div><div class="sub" data-page-node-id="QNOP6Ca9zBo98XewQvTQbL">协议可扩展 · 新设备随固件增加</div></div></div>
+    <div class="body" data-page-node-id="ZD3XDWwM0by3gz39CSVWUq">
+      <div class="sec" data-page-node-id="s0YlfzGobZewGFvPHDkqFB"><h3 data-page-node-id="EG48DhoQF2ab4r7whJwCr0">下端设备连接状态</h3><a onclick="toast('已重新扫描 RS485 总线')" data-page-node-id="m1rMxfEb1SOGq4z0MQ1ARy">重新扫描</a></div>
+      <div class="card" data-page-node-id="2EDCD4ACdDzKrR61MExASi">
+        <div class="sens" data-page-node-id="UYtQRCDA5226D5xdWr1yfp"><span class="d" data-page-node-id="8iyEBX95fKGZ6gnsWLOihr"></span><div style="flex:1" data-page-node-id="ihfaSNJmOHIlqSy3DOVutj"><div class="nm" data-page-node-id="fqto2qGFVj9GfAN7mYEElH">力合雷达流量计 LHRV-300</div><div class="ds" data-page-node-id="mj4VZtcxUmfAVWhxHjeheZ">6~30V · RS485 · 地址 0x01</div></div><span class="chip" data-page-node-id="XQNHSpqqsEbwTPIc5K08cG">已连接</span></div>
+        <div class="sens" data-page-node-id="PWDUTx0lqCC3F5INntCbRe"><span class="d" data-page-node-id="YGLApIRGX5aFhC5C58TM6e"></span><div style="flex:1" data-page-node-id="jvxQAvOltCpMYPJw1otV1D"><div class="nm" data-page-node-id="hmD3EeyAuB90ETiSB1EERA">力合雷达水位计 LHRW-200</div><div class="ds" data-page-node-id="doOGQnCP9IDlmLm7uKbRRz">6~30V · RS485 · 地址 0x02</div></div><span class="chip" data-page-node-id="LPG1AnS3okj1pXk0YHvBFX">已连接</span></div>
+        <div class="sens" data-page-node-id="87xShYL272FumkYZKl2RiA"><span class="d off" data-page-node-id="YZHMCywf4YFwvwE4Gnumja"></span><div style="flex:1" data-page-node-id="MN0nMXSmkUI8AdlpBAWlbM"><div class="nm" data-page-node-id="o2ZxaRkmErPE7i5yUEu7jz">航征多普勒流量计 ADCP</div><div class="ds" data-page-node-id="NJEil3g49liwiPCv8XpRlW">地址 0x03 · 无应答</div></div><span class="chip g" data-page-node-id="GjiEhdZWgbQeLrRgpDts0l">未连接</span></div>
+        <div class="sens" data-page-node-id="gRugrM6xHNdqAw42i61UE6"><span class="d off" data-page-node-id="MXYqpVPumdabzhHNXmWUeO"></span><div style="flex:1" data-page-node-id="9sVKtmfNUYEUAuq2pimLGX"><div class="nm" data-page-node-id="EsYfLZUENErvolEjo4E2Uj">智旭电磁流量计</div><div class="ds" data-page-node-id="OJTEKL7fdFqce0v7qMruMm">地址 0x04 · 无应答</div></div><span class="chip g" data-page-node-id="TINqirh9IfsFt27XHu6TNg">未连接</span></div>
+        <div class="sens" data-page-node-id="m5pgbSrY34t26ymFcrtkce"><span class="d off" data-page-node-id="gbmNQCBlwPjPk45kMU5xTn"></span><div style="flex:1" data-page-node-id="ND2ZFfTSgqiB9SUEM0vJbN"><div class="nm" data-page-node-id="BgjPWt0SmHjMR5VpWoFlCc">PH / 电导率 / 浊度 多参数探头</div><div class="ds" data-page-node-id="8wjddjJGe6V5m50ezdR7tW">25-27 · 双 485 总线可用</div></div><span class="chip g" data-page-node-id="stJ8VmliH1SaUhw6KMlFnm">未连接</span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="tAE2KeNzLpHpncgfpdQPP5"><h3 data-page-node-id="lkxY0h8RLJDBPocO7DOSQs">RS485 总线参数</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="96XcY6PCLIoqqDHMCWRrVu">
+        <div class="field" data-page-node-id="dGFGTgEYTYRpyYi7DkeCfx"><span class="lb" data-page-node-id="EM4YqPrNHqKzJLiD4lR1eg">总线 1 协议</span><span class="sp" data-page-node-id="wJ7vx3WXS7NOmbv6G4Wooe"><div class="pick" data-page-node-id="GmrPzoFFMYAFWP8WvapHiY">LHLL 力合私有 <span data-ic="chev" data-page-node-id="30ncv1azjr08Mwv9DceELd"></span></div></span></div>
+        <div class="field" data-page-node-id="MYG7mJnjUBXYangD8BLetO"><span class="lb" data-page-node-id="VbJzawqhL15Jim0AFLQtD1">总线 1 波特率</span><span class="sp" data-page-node-id="9yjgH9SxAbxAj5qLUV6LSz"><div class="pick" data-page-node-id="ojXHFSqiqLaQzRxENcrgWp">9600 <span data-ic="chev" data-page-node-id="mCS4M4aT7OyTPP0nWyIySM"></span></div></span></div>
+        <div class="field" data-page-node-id="weyvVdH97SmipvFohrdsGu"><span class="lb" data-page-node-id="qEUdDVqPp5DWyTQvMO5H8H">总线 2 协议</span><span class="sp" data-page-node-id="VApNsci2GXRSuEaWjoRwQd"><div class="pick" data-page-node-id="MZ93VCxjkDhyiXWRTqxyxi">Modbus RTU <span data-ic="chev" data-page-node-id="7YE02S97PkSioI4GxZooem"></span></div></span></div>
+        <div class="field" data-page-node-id="HwsE6bTr5ncgCuW4NnX1Sc"><span class="lb" data-page-node-id="ECw8Fu4wUgbolwqz4Iu9ff">总线 2 波特率</span><span class="sp" data-page-node-id="U8iOlTMx5hAIVdQwO9txCb"><div class="pick" data-page-node-id="VHzZH5uDhpKWlht3da7Ikh">19200 <span data-ic="chev" data-page-node-id="UQbJGkCS7nEmlHZHKPYIZO"></span></div></span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="UA2j7o8SYfUIGfHH0i4eEC"><h3 data-page-node-id="Smy0GtxKNtIysV3ZyFaXHO">传感器标定入口</h3></div>
+      <div class="row" onclick="toast('进入 PH 三点定标流程')" data-page-node-id="hWLtY43HtmMVEbWgHnFZ3M"><span class="ic" data-ic="flask" data-page-node-id="gjkOkAPHI1LGKIDwAH9nVL"></span><div class="tx" data-page-node-id="tAmhufGbE9PkD5asxZ8GzS"><div class="a" data-page-node-id="tWIprZ1OKgtPBPt0ZkCC0t">水质探头校准</div><div class="b" data-page-node-id="5rRSa1ycKAwm3mxPgQuNYx">PH / COD / 氨氮 / 悬浮物 三点定标</div></div><span class="chev" data-ic="chev" data-page-node-id="NJDdumggwSgVBJFEPCtAl3"></span></div>
+      <div class="row" onclick="toast('进入流量计参数配置')" data-page-node-id="lsnGptAGqDsL2OUwKugEuu"><span class="ic" data-ic="gauge" data-page-node-id="4kegObjvkHh1N67iYHgSNT"></span><div class="tx" data-page-node-id="e62guWKGlPjYgWd3NLWRVg"><div class="a" data-page-node-id="HgCJcGnLetajAUOOiRHdmN">流量计参数配置</div><div class="b" data-page-node-id="wN4DLt8DegnX2kOW1TdDYS">断面形状 / 死水位 / 灵敏度 / 角度锁定</div></div><span class="chev" data-ic="chev" data-page-node-id="a1EmXELhtZ7KHhV3T6dC8P"></span></div>
+      <div class="row" onclick="toast('进入串口透传调试')" data-page-node-id="rCqEJxmYYXWFtKNTFEM5c3"><span class="ic" data-ic="code" data-page-node-id="H9sHAMB1GiyI1PUHiAbTVn"></span><div class="tx" data-page-node-id="mzOBuqOEnlgY55AZMpg5Nl"><div class="a" data-page-node-id="k2ueKQ4tGYLuoLOTQitJgh">串口透传调试</div><div class="b" data-page-node-id="Z8KErodsIbMarGiF9HhSAf">十六进制收发 · 最长 255 字节</div></div><span class="chev" data-ic="chev" data-page-node-id="qFlGTCt82hubNdX9mKvTmJ"></span></div>
+    </div>
+  </section>
+
+  <!-- ========== 断面设置 ========== -->
+  <section class="screen" id="s-section" data-page-node-id="3dt7nB7MNCNngFuPuIuuxj">
+    <div class="hd" data-page-node-id="BgLbEN5GLFj9xbmxFMPWY2"><button class="back" onclick="back()" data-page-node-id="m9YDYh7KkaFHyaO4j61B8s"><span data-ic="back" data-page-node-id="x0672reHHhieruAH8J4OKA"></span></button>
+      <div data-page-node-id="qRDTYr76ivGORMP8Z4WPUz"><div class="ttl" data-page-node-id="R3l2YVK74SM6fotznv2ZKF">断面设置</div><div class="sub" data-page-node-id="ITCTi37buwFj6Iw4er3Axk">图形与表格联动 · 支持模板导入</div></div></div>
+    <div class="body" data-page-node-id="KIGxKQplhVzUyZ2VYHAeZT">
+      <div class="seg" style="margin-bottom:11px" data-page-node-id="sHZI9mPAoBUwOMEza5JB1K">
+        <button onclick="segPick(this,'矩形')" data-page-node-id="YIL4Bzw5m42u21rOTPuwsj">矩形</button>
+        <button class="on" onclick="segPick(this,'梯形')" data-page-node-id="SOMWRG52XcuQ9A2xz8ynep">梯形</button>
+        <button onclick="segPick(this,'圆形')" data-page-node-id="bLh7EP8NahfpCQZothfETU">圆形</button>
+        <button onclick="segPick(this,'U形')" data-page-node-id="size1MjUC6EvOCmL7QXi8t">U 形</button>
+        <button onclick="segPick(this,'不规则')" data-page-node-id="1Aa7FcbgIjFBD9p8qYGrmB">不规则</button>
+      </div>
+
+      <div class="card" style="padding:10px 10px 4px" data-page-node-id="FLc1jsl3fsmkqROOWcijDD">
+        <svg class="section-svg" viewBox="0 0 330 158" data-page-node-id="S35akwc58KSYPH2k1qLBMD">
+          <defs data-page-node-id="EYapnDFBgbzWFoO8KYvuaT">
+            <linearGradient id="wg3" x1="0" y1="0" x2="0" y2="1" data-page-node-id="X4r5mETyxwSKPwEs1wo7vX">
+              <stop offset="0" stop-color="#5FB3F0" stop-opacity=".58" data-page-node-id="jy3I62HTipvjcaZdUQZYdg"/>
+              <stop offset="1" stop-color="#0A6FD8" stop-opacity=".3" data-page-node-id="iSod2byJdT3S0tcXKz99w7"/>
+            </linearGradient>
+          </defs>
+          <polygon points="18,26 62,124 268,124 312,26" fill="#F1F5FA" stroke="#C3CFDD" stroke-width="1.2" data-page-node-id="8tPWlJBVM2CQk2lT4ztKUa"/>
+          <polygon points="43,70 287,70 268,124 62,124" fill="url(#wg3)" data-page-node-id="tTKbCkkoIBRNgyBtJlpZ3Y"/>
+          <rect x="62" y="116" width="206" height="8" fill="#D9CDB8" opacity=".85" data-page-node-id="KP76GWBNvdVyAOeIKvsMAt"/>
+          <line x1="43" y1="70" x2="287" y2="70" stroke="#0A6FD8" stroke-width="1.5" stroke-dasharray="6 3" data-page-node-id="29Ku8Sw6JwEb5DrkWSvqB3"/>
+          <text class="vl" x="285" y="65" text-anchor="end" data-page-node-id="9E5BRvrsuXdAqVosGDNUdN">水位 2.316m</text>
+          <line x1="62" y1="124" x2="62" y2="144" stroke="#93A1B3" stroke-width=".8" data-page-node-id="JoCzFFZrbsGjkFBFRbmrnn"/>
+          <line x1="268" y1="124" x2="268" y2="144" stroke="#93A1B3" stroke-width=".8" data-page-node-id="EZH7EhBZrocVD0UgiAwSvx"/>
+          <path d="M62 140 h206" stroke="#93A1B3" stroke-width=".8" data-page-node-id="rkCVbxZHCv6IBR7ibE0UHD"/>
+          <text class="ax" x="165" y="153" text-anchor="middle" data-page-node-id="YyvNiDt5vXVAdAJO7GlYsV">底宽 b = 1.20m</text>
+          <path d="M18 26 l24 10" stroke="#0EAFBE" stroke-width="1.6" data-page-node-id="KK5eXnNqSmIBbcZVCf4aO0"/>
+          <line x1="42" y1="36" x2="42" y2="60" stroke="#0EAFBE" stroke-width=".9" stroke-dasharray="3 3" data-page-node-id="APMArCHVvKOhFL58Zi5tyU"/>
+          <line x1="18" y1="60" x2="42" y2="60" stroke="#0EAFBE" stroke-width=".9" stroke-dasharray="3 3" data-page-node-id="YaRM9JZdqcpTAOA7ePSmWG"/>
+          <text class="ax" x="46" y="56" style="fill:#0A8C99" data-page-node-id="dRtVOrFWNQTHi8lvlMeB3q">边坡 m = 1:0.5</text>
+          <rect x="62" y="116" width="60" height="8" fill="#B9A88A" data-page-node-id="fCTvoQdFa09wmqOcWrEAzU"/>
+          <text class="ax" x="128" y="112" style="fill:#8A7A5C" data-page-node-id="HKuYRpfU1q0AEAmKO63Fbq">淤积 0.082m</text>
+          <text class="ax" x="18" y="18" data-page-node-id="mxTSK7RVfExcN0jIwFNYHQ">渠顶</text>
+        </svg>
+      </div>
+
+      <div class="sec" data-page-node-id="ktKNh4GAxJPMfhl9dB0tJE"><h3 data-page-node-id="WBy3GyLqcpGysqXjaTEGs0">断面参数</h3><a onclick="toast('从 Excel 模板一键导入')" data-page-node-id="nYPlriuvrBtvnLTd34gGJj">导入模板</a></div>
+      <div class="card" style="padding:0" data-page-node-id="hrr1wD97hBs91gfb1PyJ1f">
+        <div class="field" data-page-node-id="6PKfjAoj0FY5WbMmdgX7Ux"><span class="lb" data-page-node-id="dcqPqlPegFimesL68dQALo">断面形状</span><span class="sp" data-page-node-id="NaXEsHIyJWU39m5sjgv3TG"><div class="pick" data-page-node-id="gPJQI0pdglHzd7zzREZM7R">梯形 <span data-ic="chev" data-page-node-id="vcB5QJkPrlTSTPIDd3t8H0"></span></div></span></div>
+        <div class="field" data-page-node-id="SLWepQ6TYyyhCLA0UzVFFw"><span class="lb" data-page-node-id="EzpDhSm61R1o8mH6fo5KCK">底宽 b</span><span class="sp" data-page-node-id="4wKWSa0Ot7VcLHrfmT2OuT"><input class="inp mini num" value="1.20" data-page-node-id="k3a9irAiWmCyHnbiHNkklg"><span class="unit" data-page-node-id="ueD6nb0ynyO9fRkYwERlml">m</span></span></div>
+        <div class="field" data-page-node-id="R9mlCWBeF4MUlRcm50HQ0s"><span class="lb" data-page-node-id="JMd07BiLlx6AvpB2fw6RHZ">边坡系数 m</span><span class="sp" data-page-node-id="zEHG55oQF12MvXLr3mcKAI"><input class="inp mini num" value="0.5" data-page-node-id="ENftwhDQuF4NIWvzQUtg4M"></span></div>
+        <div class="field" data-page-node-id="E14SocNb3fRwgK8XP8PSM3"><span class="lb" data-page-node-id="zLFENg2e4VjrOUk4Y85CQe">渠底高程</span><span class="sp" data-page-node-id="eEK2r3G6o8Qk4WLETzoQ01"><input class="inp mini num" value="0.000" data-page-node-id="P16MWeBWjBmRo5h8IpeGRk"><span class="unit" data-page-node-id="JQwEwMlpPPXSGteG99PrCB">m</span></span></div>
+        <div class="field" data-page-node-id="hnnDMUmhhwOO8WGmXdPtQB"><span class="lb" data-page-node-id="dqXDuneR3CaemEpXIVX8VP">淤积厚度</span><span class="sp" data-page-node-id="AzPv2AQC653FE0tiyRAzBj"><input class="inp mini num" value="0.082" data-page-node-id="wQdh0UdXT3bkFABwRtK3hb"><span class="unit" data-page-node-id="ac1olfrWbk4r7uHLG8PSZL">m</span></span></div>
+        <div class="field" data-page-node-id="kpzVIgOVhwSXKqCG7IS668"><span class="lb" data-page-node-id="FONo2rMLtyaFGfuiZg30Zp">安装高度</span><span class="sp" data-page-node-id="Ej8GW3uHhpoJ1Mpq9ABIWF"><input class="inp mini num" value="2.790" data-page-node-id="pvI6Qd1dAAtCVvGuySEyeH"><span class="unit" data-page-node-id="YKiEqjfitg88KMqCdD8P8i">m</span></span></div>
+        <div class="field" data-page-node-id="wunav0b7Myn5wz2B3LdVmg"><span class="lb" data-page-node-id="z7tLEiRFiDPfCxhQYtncUT">空高盲区</span><span class="sp" data-page-node-id="YgcGowsBvpghDN1b5lhnKg"><input class="inp mini num" value="0.300" data-page-node-id="qcGwv83dwEt3cRYNnA7Ll9"><span class="unit" data-page-node-id="sk2L9X9uO83oDGzC03hn2T">m</span></span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="sO9e2ijfJtvgKoPXjxahPe"><h3 data-page-node-id="DOHgJEOCarp2g8BxFGxUAA">结果预览</h3></div>
+      <div class="card tight" data-page-node-id="7lofM27t9QaKA51wjeJ3Ha">
+        <div class="kv" data-page-node-id="yAZyoFI8B4UlyuLCDlFzxB"><span class="k" data-page-node-id="mp9iGyQtWzH1EbGOxs26uj">当前水位下水深</span><span class="v num" data-page-node-id="Q4HDZlLec4eHj6cweBb320">1.842 m</span></div>
+        <div class="kv" data-page-node-id="WCBGv2QtpwMIwCX4XdoHZr"><span class="k" data-page-node-id="sCAsblcNSFI69ke1WhwEgn">水面宽</span><span class="v num" data-page-node-id="8S6hNbsMXxPtUEurgBzly1">3.042 m</span></div>
+        <div class="kv" data-page-node-id="5nBHp9bySVOazo0RiN3f5Q"><span class="k" data-page-node-id="6GkgClYTKu4zt02bpBPNgI">过水面积（扣除淤积）</span><span class="v num" data-page-node-id="h55UIUvHNPlQ46Hmxq02FA">1.964 m²</span></div>
+        <div class="kv" data-page-node-id="55mdS2ytgT9ojrZyG9Evxb"><span class="k" data-page-node-id="qUFYh5H6PRDV0Xr6LvGIRo">湿周</span><span class="v num" data-page-node-id="5g87DAbUSGOe8F8pHG9SSp">3.418 m</span></div>
+      </div>
+
+      <div class="btns" style="margin-top:14px;flex-wrap:wrap" data-page-node-id="4GgpXAyzVJZhGiJGRMiWcZ">
+        <button class="btn gh sm" onclick="toast('断面参数已导出为 Excel')" data-page-node-id="YIGfvDpYTaXX1qd32R7Xjh">导出断面</button>
+        <button class="btn" onclick="toast('断面参数已写入设备')" data-page-node-id="kDJ0eRcjrDBMBtClYdjgAH">保存并同步</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 率定与系数 ========== -->
+  <section class="screen" id="s-calib" data-page-node-id="OsMhdYm74L9sK9qya75XGA">
+    <div class="hd" data-page-node-id="QOAdtSer5aXqWMvtzbd7AB"><button class="back" onclick="back()" data-page-node-id="mY1dc5gIs0WAUJ3pV9eMlH"><span data-ic="back" data-page-node-id="7ATdhi2Y0WyGQrSNglcMZT"></span></button>
+      <div data-page-node-id="0CGBvuICpiAQAG8Gco3M7P"><div class="ttl" data-page-node-id="AuUfBE6cfCjVed27HeY5oS">率定与系数</div><div class="sub" data-page-node-id="zJkg4FhtaXybSQzCuClNFT">水深推流 / 堰槽法 · 分段函数</div></div></div>
+    <div class="body" data-page-node-id="OoN3T290NcCHxYGCOHvP40">
+      <div class="sec" data-page-node-id="OBwQEteXiC5xDAwGcsArz4"><h3 data-page-node-id="cNl1GOwfV2muFTXAYFvgZd">率定方式</h3></div>
+      <div class="seg" style="margin-bottom:11px" data-page-node-id="wag3nCTKpWFgnxb6Br2Pd9">
+        <button class="on" onclick="segPick(this,'水深流量关系法')" data-page-node-id="gUMu5dAaM0IHncN9safgFV">水深推流关系</button>
+        <button onclick="segPick(this,'标准堰槽')" data-page-node-id="gLECncH3OkkEufIoNT6M9y">标准堰槽</button>
+      </div>
+
+      <div class="sec" data-page-node-id="EsbCjE6VbjIjnIInEn3fX5"><h3 data-page-node-id="spEnBfqYhjWIqO3KkYrM9e">标准堰槽类型</h3></div>
+      <div class="card" style="padding:12px" data-page-node-id="gFpz4NKIcgTYRhBdgVk140">
+        <div style="display:flex;flex-wrap:wrap;gap:8px" data-page-node-id="3CVvLAFtEJkKQfDh9cIJJj">
+          <span class="chip b" style="padding:6px 13px;font-size:12px" data-page-node-id="AIPDa6PNtRSX6aTK5zjnuB">三角堰</span>
+          <span class="chip b" style="padding:6px 13px;font-size:12px" data-page-node-id="fZarZcf1ahmyx9Fx2q195f">矩形堰</span>
+          <span class="chip b" style="padding:6px 13px;font-size:12px" data-page-node-id="NKKFAEsT9HYdzIr9UBRmxK">梯形堰</span>
+          <span class="chip b" style="padding:6px 13px;font-size:12px" data-page-node-id="VZAQ00dbGf9PLuv3hYfjFD">巴歇尔槽</span>
+        </div>
+        <p style="font-size:11px;color:var(--text-3);margin:10px 0 0" data-page-node-id="OQGwgruhCW2MRLoHvIcCAj">点击后弹出规则堰槽参数录入；非规则堰槽请使用水深流量关系法</p>
+      </div>
+
+      <div class="sec" data-page-node-id="0PbHG9JTi6i2WrJ1A2mCP6"><h3 data-page-node-id="fLtlJT8ylRZ3cE8gBxNuy4">分段曲线系数</h3><a onclick="toast('已新增 1 段曲线')" data-page-node-id="pm9b52tT4lIm0cEuy3oR6V">新增曲线</a></div>
+      <div class="card" style="padding:0" data-page-node-id="NBbqVTuKPB1PSrrLInT0bV">
+        <div class="field" data-page-node-id="kECyWp4CnYthk4w8Srlkxv"><span class="lb" data-page-node-id="1YP3i50vlI5AKHuDXM4DBf">曲线 1 · 水位上限</span><span class="sp" data-page-node-id="dkj6a1CJ99pC1Ki2RiWedd"><input class="inp mini num" value="2.000" data-page-node-id="MGxK4nUJVpH2yWoTkOQ0pK"><span class="unit" data-page-node-id="P5BqqSbRJRkCrtsZDe06yc">m</span></span></div>
+        <div class="field" style="padding-top:9px;padding-bottom:9px" data-page-node-id="syW2lfwhAMtCwH11fc4Bvh">
+          <span class="lb" style="font-size:12px" data-page-node-id="EMULFgnljfEgEFl36lIsPt">a = 1.113　b = 1.003　c = −1.000</span>
+          <span class="sp" data-page-node-id="DgArCOrz4jC1AgyW8lesxi"><span class="chip e" onclick="toast('已删除曲线 1')" style="cursor:pointer" data-page-node-id="S9K0f4Og1rGOW6n7e3iqnm">删除</span></span>
+        </div>
+        <div class="field" data-page-node-id="ZYPz1NEv5gBFkupq7xtD2l"><span class="lb" data-page-node-id="lUkRfzR9HWgqfkeFDiyKKG">曲线 2 · 水位上限</span><span class="sp" data-page-node-id="TgggisiIzxMTBriqLt9l7n"><input class="inp mini num" value="5.000" data-page-node-id="0oSya8DH9c4x276JS2YbGP"><span class="unit" data-page-node-id="sXIEgZLkGZdm32hzPQLoiX">m</span></span></div>
+        <div class="field" style="padding-top:9px;padding-bottom:9px" data-page-node-id="yVCtFnY1EzDdLJNwgOAeWR">
+          <span class="lb" style="font-size:12px" data-page-node-id="HH4puMcbNzOKP2gmzIIqyO">a = 1.204　b = 0.986　c = −0.740</span>
+          <span class="sp" data-page-node-id="dCg5fuAf35laH4X4qQSCq0"><span class="chip e" onclick="toast('已删除曲线 2')" style="cursor:pointer" data-page-node-id="jggYUsmyNLoWPzbLLymoGa">删除</span></span>
+        </div>
+        <div class="field" data-page-node-id="dW98YgHnGD1IoAmGG44JbZ"><span class="lb" data-page-node-id="o6wjayvIIJzemGkzvJBi9Y">曲线 3 · 水位上限</span><span class="sp" data-page-node-id="ZnxV7zitW480M9Vh0Ym9Am"><input class="inp mini num" value="8.000" data-page-node-id="nLNy2vA2KMS0ZFhLa5WUmF"><span class="unit" data-page-node-id="JLPAiXDKZS1lrcqHWcVWHz">m</span></span></div>
+        <div class="field" style="padding-top:9px;padding-bottom:9px" data-page-node-id="yXUXkWMgDSerRXyS03E581">
+          <span class="lb" style="font-size:12px" data-page-node-id="RRXJfCFc7PGnDOPmB7lhL0">a = 1.351　b = 0.942　c = −0.512</span>
+          <span class="sp" data-page-node-id="xiPB3AQkAFP1dI1XCzecFL"><span class="chip e" onclick="toast('已删除曲线 3')" style="cursor:pointer" data-page-node-id="yvVTNwgtIK9Rz3BBgHQnq1">删除</span></span>
+        </div>
+      </div>
+
+      <div class="sec" data-page-node-id="hHweJSlciXalGkGSjvwYZi"><h3 data-page-node-id="ebvuGsv3P0ZK6u6H9V0Zat">断面流速计算系数</h3><a onclick="toast('从模板一键导入')" data-page-node-id="SGm3KtaU2X6cINt1Q8dCmh">导入模板</a></div>
+      <div class="dlist" data-page-node-id="LJacZwWq5C9aPnGUklsmZQ">
+        <div class="dhead" style="grid-template-columns:60px 1fr 1fr" data-page-node-id="R0mF4aLathwDpZtoFsPJt8"><span data-page-node-id="CJJwrTGWrVdY3pgkGWBuc5">序号</span><span data-page-node-id="vddUdytZX0dWYXhPrFtgcc">水位上限(m)</span><span data-page-node-id="4qbQMXxpm4SGc4UGFEuoex">系数 k</span></div>
+        <div class="drow" style="grid-template-columns:60px 1fr 1fr" data-page-node-id="HxGd94CnaBbSBj98GDXQJa"><b data-page-node-id="HpGuIuNaLnWGEfTNH4lkyq">1</b><span data-page-node-id="j7iDPhHRPARCHdAbtFdi12">1.500</span><span data-page-node-id="pvO68BI3JAEImbhAYh81EI">0.860</span></div>
+        <div class="drow" style="grid-template-columns:60px 1fr 1fr" data-page-node-id="rDD5kDdJpbNgn3cmNS3RKL"><b data-page-node-id="JKUkFuuQQgdoimHIfh94lr">2</b><span data-page-node-id="DWvYykdIqoCRAGXwAS7YbR">3.000</span><span data-page-node-id="e2GhLHlwQ1LmiVDvhMw6FQ">0.905</span></div>
+        <div class="drow" style="grid-template-columns:60px 1fr 1fr" data-page-node-id="COSKrQrDNIyDrPN3vkkAIX"><b data-page-node-id="AGh66Jdr8o5SMNMVqVCwHT">3</b><span data-page-node-id="s53bv4WGJhRVUYzwO5swtT">6.000</span><span data-page-node-id="IulfrXQoENQehAEe3NqEir">0.938</span></div>
+        <div class="drow" style="grid-template-columns:60px 1fr 1fr" data-page-node-id="PC3S8Xuqt2w7Woi3yqEcFS"><b data-page-node-id="zlMI9UxSSjjayelE58NRww">4</b><span data-page-node-id="xaKY0YODaKJEvtgPejmVoi">—</span><span data-page-node-id="nraMRcJxS3Yfiz21LLbfOs">—</span></div>
+      </div>
+
+      <div class="card tight" style="margin-top:12px" data-page-node-id="qSEFEKQs1BZKnVmCaiCrPo">
+        <div class="kv" data-page-node-id="o0kyHktZ4ppJNjDBanLmDC"><span class="k" data-page-node-id="EbVWa0BSzNBvOJlWpfBFai">累计流量初始值</span><span class="v num" data-page-node-id="Ey7tfALBVQANR4S6B7IdXP">0.000 m³</span></div>
+        <div class="kv" data-page-node-id="s2fp3Pe5G9lMhEbCZziUn6"><span class="k" data-page-node-id="YY4hGpqrtOHsJ4t0t0kACY">流向滤除</span><span class="v" data-page-node-id="GHRLpn2W1SKoQVpi8BGx8x">不滤除</span></div>
+        <div class="kv" data-page-node-id="7u2caoWTEbniPa3xIV9Zr7"><span class="k" data-page-node-id="OQ4VlOtlNvsRefsvvSH6Cj">最大流速限制</span><span class="v num" data-page-node-id="c8xli4ZyedoFJGI6UyZFBy">5.000 m/s</span></div>
+      </div>
+
+      <div class="btns" style="margin-top:14px" data-page-node-id="GuBVsClDXYY0kSNB4UKS8X">
+        <button class="btn gh" onclick="toast('已读取当前系数')" data-page-node-id="eW60cwTE1B5KmCI0F3Lm23">读取</button>
+        <button class="btn" onclick="toast('率定系数已写入设备')" data-page-node-id="THcd0gomZ6A6igkf7EH5dk">保存并同步</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 报警阈值 ========== -->
+  <section class="screen" id="s-alarm" data-page-node-id="nXh4xfE0ggrRYj8mQ032P4">
+    <div class="hd" data-page-node-id="6diakU0xllfmxcba4TK1PD"><button class="back" onclick="back()" data-page-node-id="zuNMxOSFtRc9a63VduKCL9"><span data-ic="back" data-page-node-id="PHqppX3nPwalh1JVrOMCI5"></span></button>
+      <div data-page-node-id="C56TuAFSSI9BJoihcvkmVQ"><div class="ttl" data-page-node-id="uDR5gnfbg5N61AWhpnexzA">报警阈值</div><div class="sub" data-page-node-id="7rwnVtb72t1H6Pf3bEFqBa">本地蜂鸣 + 平台推送</div></div></div>
+    <div class="body" data-page-node-id="n1TKtqpfSNpkzzEjUecyxT">
+      <div class="alert w" data-page-node-id="RTjGl9andJyewNdgYu3c8F">
+        <span data-ic="info" data-page-node-id="mIfNp9xhOMqCz6etEdNYNz"></span>
+        <div data-page-node-id="KFd4nib0gCb3gxoIMm4XxZ">阈值同时下发至设备与平台。设备侧越限立即本地报警，平台侧用于推送短信与工单。</div>
+      </div>
+
+      <div class="sec" data-page-node-id="iY5S9HJGYuy8gPXybbSMHo"><h3 data-page-node-id="picon6df7E01REACKmAce0">水位报警</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="bBCBtUF7rzGsEKLgFQg1fk">
+        <div class="field" data-page-node-id="uFujZ0zSqxEcJ1rYdt9bxX"><span class="lb" data-page-node-id="Upvmo9shOKLaVP4fHVeNPK">低水位报警<s data-page-node-id="o4Z6muWxydAEZyf7AFwpYW">低于该值触发</s></span><span class="sp" data-page-node-id="M2qqJdoGX8GT80BB4GoLeW"><button class="sw" onclick="sw(this)" data-page-node-id="zsNSFhYFWE2tmHYlZPVsf9"><i data-page-node-id="SZBy8tG0l5d10OXSaWpvPT"></i></button><input class="inp mini num" value="0.300" data-page-node-id="8jqCrkonnnkxCzABzw5Jxk"><span class="unit" data-page-node-id="6rk8Zrw16PLVuPHCBbjoj0">m</span></span></div>
+        <div class="field" data-page-node-id="lvDdG0mAkUF8O8c9iAQoMy"><span class="lb" data-page-node-id="0TVSg3fB26vIeiexakWape">满管水位报警</span><span class="sp" data-page-node-id="2LSTJqB3UC7FZfxeujX7wY"><button class="sw on" onclick="sw(this)" data-page-node-id="KALv5XAlaex0r2cidB1uOu"><i data-page-node-id="Ke1dr3yWOYCdOMhogiM98S"></i></button><input class="inp mini num" value="2.800" data-page-node-id="zIF6dybRREmRKo9P9H7hF1"><span class="unit" data-page-node-id="ljorGqwDJt1aKG0doJWnat">m</span></span></div>
+        <div class="field" data-page-node-id="ZroYeEoo8WjvMLsWAkfAMQ"><span class="lb" data-page-node-id="BrTIW44lMSlLIofnOlDOx5">高水位报警</span><span class="sp" data-page-node-id="ZrJtK5cEdJVzxrm5b3Nf5g"><button class="sw on" onclick="sw(this)" data-page-node-id="s3KJnbYDnSGl9BQbMjqQlB"><i data-page-node-id="mX6nuhDy1UyKFzg0q991uS"></i></button><input class="inp mini num" value="3.200" data-page-node-id="j9jzGFIXGS7PVJe4VtjVTD"><span class="unit" data-page-node-id="AvARQH2HFSLYJuIyA2cFJz">m</span></span></div>
+        <div class="field" data-page-node-id="YALHGIBeaFpba3Zvlgc0Kg"><span class="lb" data-page-node-id="dz3GnFaAW7FUjyJaGM6KcZ">超高水位报警</span><span class="sp" data-page-node-id="m2jHafKzzTTq5bk5Jv1QSN"><button class="sw on" onclick="sw(this)" data-page-node-id="4IdYSCcDmZXWXo9Yy7YEds"><i data-page-node-id="nBsx6l9RFg0d3dRebOv4rg"></i></button><input class="inp mini num" value="3.600" data-page-node-id="24D7nTeHRiqKAdHtXVQyGz"><span class="unit" data-page-node-id="hGUgaVCQzAWUOS3z9BsMnb">m</span></span></div>
+        <div class="field" data-page-node-id="Mag01NIEM1YWPDlBvO7P68"><span class="lb" data-page-node-id="pH6N5EXgnl8s5VHmVLHE1k">溢流水位报警</span><span class="sp" data-page-node-id="XKF0Cj8wVWA4AJ0htYrXLK"><button class="sw on" onclick="sw(this)" data-page-node-id="FDtAY3CQMWguzKPWusEqNV"><i data-page-node-id="A83eTLFAJ3conPkMvMdwBB"></i></button><input class="inp mini num" value="4.000" data-page-node-id="jVB7H1mFY94C4DHVJ3bbyP"><span class="unit" data-page-node-id="CkPZXdbR8iPxcRmafeeTH5">m</span></span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="xEENMBqD51wTWosBOT55j3"><h3 data-page-node-id="Di0ASyNSR0dn04SgnUc4DM">流速报警</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="qREkpHaUY8um8bbLYUSH2A">
+        <div class="field" data-page-node-id="Eh3IoJZNrUqp742yTWvRVq"><span class="lb" data-page-node-id="ht7T3jYNrLLg25VmVwjV0I">流速上限</span><span class="sp" data-page-node-id="gY8dnjQhNmlcRASsKyqRcf"><button class="sw on" onclick="sw(this)" data-page-node-id="AjqlxspL3tDaaiWzEPgFDW"><i data-page-node-id="TUgkL0ij4YCTVI2uPShP2U"></i></button><input class="inp mini num" value="3.000" data-page-node-id="GhFpctsjN78cSVrBAdsFvx"><span class="unit" data-page-node-id="8HGI7DMa8nyyZabwyQFPRY">m/s</span></span></div>
+        <div class="field" data-page-node-id="jfn0TzZkaG48bfY9FkIAwK"><span class="lb" data-page-node-id="kC8eWu9vFM6wkphj55rZRh">流速下限</span><span class="sp" data-page-node-id="cCcrblS9FKYBSbRT8cbqlY"><button class="sw on" onclick="sw(this)" data-page-node-id="2TfVIGwU6MxO44CmPm3AL3"><i data-page-node-id="jGowEbjqaznAtHHXmcxKkU"></i></button><input class="inp mini num" value="0.050" data-page-node-id="sJJmoioKblAdmLhmgbC3uB"><span class="unit" data-page-node-id="E0WHlzqrUgvMhmlk1cRdal">m/s</span></span></div>
+        <div class="field" data-page-node-id="A9AmEPAmyeE44h5rYYkYPM"><span class="lb" data-page-node-id="j1dTf0bWdyxDIXSuh1Gpzc">流速突变<s data-page-node-id="3SZfz9Lgl3A0lmIapOCpV6">相邻周期变化量</s></span><span class="sp" data-page-node-id="dUmAcelO7ODE9hlB9BCQ1J"><button class="sw" onclick="sw(this)" data-page-node-id="D0BOXVXWL9reCLf1gQgl4T"><i data-page-node-id="DLzmBZLqOh9KDtx16DzH3X"></i></button><input class="inp mini num" value="1.000" data-page-node-id="FszDGlIRPWGsP5ZuENFZEH"><span class="unit" data-page-node-id="TyRIu5Kh4IftaTf5gc6q4S">m/s</span></span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="3bIBWdTvwzcCjOkSBKWtf3"><h3 data-page-node-id="OewGi7u9VszkIARbi3lPGG">流量报警</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="VYGswbBI33YAdEswMArSPL">
+        <div class="field" data-page-node-id="ZhGeEAKSkOVTiZh3j1viMT"><span class="lb" data-page-node-id="oV72en3bsL1nVE02KdXJ4l">流量上限</span><span class="sp" data-page-node-id="AaIZQm4Cj5PouNokbnHfvb"><button class="sw on" onclick="sw(this)" data-page-node-id="0DWyYVfp0vuFLVllwR9LTy"><i data-page-node-id="ZORn0Day2ssIAUertPlf1Z"></i></button><input class="inp mini num" value="8.000" data-page-node-id="0b0LWuefj1c1co91UpGrEL"><span class="unit" data-page-node-id="ywMGO3EquRnzFYLG1VvUDX">m³/s</span></span></div>
+        <div class="field" data-page-node-id="yUTuG796h2djWmBnNU2yEk"><span class="lb" data-page-node-id="BAbzSaFtNdtEwYG0S5dTLA">流量下限</span><span class="sp" data-page-node-id="BUuM9eqpoFKcIvd4jl4rjT"><button class="sw" onclick="sw(this)" data-page-node-id="m9qrtMPb6FKJO27e0vwu4w"><i data-page-node-id="g2xfOPTj0w0KTSxyrIvgyE"></i></button><input class="inp mini num" value="0.010" data-page-node-id="PsvhEginIXUHHM5Ss60dlX"><span class="unit" data-page-node-id="lXdyBuL3kQp0US4xwFiUey">m³/s</span></span></div>
+        <div class="field" data-page-node-id="nbdypCYQk9oiZHQLxgmtyB"><span class="lb" data-page-node-id="oJ0eeVIg9CpEqXBcbdcNgv">流量突变</span><span class="sp" data-page-node-id="CLpQry1cIefcdCId4mV0hw"><button class="sw" onclick="sw(this)" data-page-node-id="M4PRmSQg8GNop3xPq3KYva"><i data-page-node-id="cNPLrqiC3rjS5klhKU3ZSr"></i></button><input class="inp mini num" value="3.000" data-page-node-id="OHPzHmwev38l0cCqQJEw42"><span class="unit" data-page-node-id="9DXnSCGZkAA51ctolcmfGl">m³/s</span></span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="ZN8fHi74LGv18gJaKSkaob"><h3 data-page-node-id="pz1cnyYzyP3qoeFUN0IdTe">设备报警</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="VtL4C4HYlv517OVkHba9OB">
+        <div class="field" data-page-node-id="P8C1k6gvKFVvZRSf7jyMWd"><span class="lb" data-page-node-id="Iok7Aj9gwmLG4EgytR3k2h">供电不足报警<s data-page-node-id="7Ca3vIBlHt1PBqD2ZfjqIN">电量低于 20%</s></span><span class="sp" data-page-node-id="47t4D3w5GijUZTN4PCa3yN"><button class="sw on" onclick="sw(this)" data-page-node-id="eGBCFtVhzNkOEVZ9Lfitgf"><i data-page-node-id="hFmksylzgq4AvliBG3qWUn"></i></button></span></div>
+        <div class="field" data-page-node-id="X10ZG1s7KEZELGyWtBonvt"><span class="lb" data-page-node-id="yOOZ4JGq1wLb7vct5lNFLG">下端设备失联报警</span><span class="sp" data-page-node-id="AVBtLp27S9CRLqKdjd4LIE"><button class="sw on" onclick="sw(this)" data-page-node-id="PEs4dBNojzGcbb3r3vsmHA"><i data-page-node-id="Eyp03Pij6BzquA84b4b6zV"></i></button></span></div>
+        <div class="field" data-page-node-id="rMl5eULKEfNxUmFqXfHWCJ"><span class="lb" data-page-node-id="4y8oWUEymUKZq64vMLHf53">水位突变报警</span><span class="sp" data-page-node-id="hbiBfqhz2IPXmBKorL39Tn"><button class="sw on" onclick="sw(this)" data-page-node-id="bFEXAFMigrj34MPEfqLnFr"><i data-page-node-id="Oer45YveHBXHBE9th7tfxn"></i></button><input class="inp mini num" value="0.500" data-page-node-id="VwDtNFo6uV4NtbxosZpdoW"><span class="unit" data-page-node-id="5uvMdezue2Me99H20iqExQ">m</span></span></div>
+      </div>
+
+      <div class="btns" style="margin-top:14px" data-page-node-id="5NTGpvg7fIgUqdDsUDeicd">
+        <button class="btn gh" onclick="toast('已读取当前阈值')" data-page-node-id="3m74atKjmrs0TSwgxA9zym">读取</button>
+        <button class="btn" onclick="toast('报警阈值已下发')" data-page-node-id="RMuXDPhCdFwVlJFxZWjQ3j">保存并同步</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 电源与升级 ========== -->
+  <section class="screen" id="s-power" data-page-node-id="CsxDZRGUfiGP0Sag7oYcmx">
+    <div class="hd" data-page-node-id="B8A4QSbrqHrNxrCqBROrhC"><button class="back" onclick="back()" data-page-node-id="9GDH55kmj7NMzH5PNRYRZo"><span data-ic="back" data-page-node-id="OcCakj0DaGWuFJSTG8DD1T"></span></button>
+      <div data-page-node-id="hVoJI4oeFJHOqqiJHj4wDV"><div class="ttl" data-page-node-id="dxGm8H1mULIAK1E6I2naxe">电源与固件升级</div><div class="sub" data-page-node-id="aVoVjQT1OynfiVrAhWtU5B">电池管理 · OTA 远程升级</div></div></div>
+    <div class="body" data-page-node-id="E87xmsh9FqqGoFqQOg8u6K">
+      <div class="sec" data-page-node-id="BtkZYXTLVhEaNbp4B50xna"><h3 data-page-node-id="T46szm5i6o62YjwDmQAWpJ">电池</h3></div>
+      <div class="card" data-page-node-id="yFoxMoz1Zw0ATmG5EqRgUT">
+        <div style="display:flex;align-items:flex-end;gap:14px" data-page-node-id="e2GZaDFHvHQUdNul6KR47g">
+          <div data-page-node-id="K3Z6uqG8VLS5Fzb1bS9AFH"><div style="font-size:10.5px;color:var(--text-3)" data-page-node-id="4QbMEBHjo5dsZeUqBgeoAf">剩余电量</div><div class="num" style="font-size:30px;font-weight:700;letter-spacing:-1px;line-height:1.1" data-page-node-id="z3fbSsW9VVRAe2PTrSFpgU">87<span style="font-size:13px;font-weight:600;color:var(--text-3)" data-page-node-id="f9NBGH4qD6TqInvdr7CqPN">%</span></div></div>
+          <div style="margin-left:auto;text-align:right" data-page-node-id="vzvXlujv6XKH7UPC3eTwWZ"><div style="font-size:10.5px;color:var(--text-3)" data-page-node-id="4smd2E0IxQYNbWk0dhIIjX">电池电压</div><div class="num" style="font-size:17px;font-weight:700" data-page-node-id="a5ATIJ6Fha0mxN0E9qHE6L">10.42 V</div></div>
+        </div>
+        <div style="height:9px;border-radius:9px;background:var(--surface-3);margin-top:13px;overflow:hidden" data-page-node-id="dZfRiZec6i5ZaFRHya4AeK"><div style="height:100%;width:87%;border-radius:9px;background:linear-gradient(90deg,#0A6FD8,#0EAFBE)" data-page-node-id="aSeMZqosCBOAd3UgSBiICi"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-3);margin-top:6px" data-page-node-id="g7xQPZSwkykzzBxaQDjKAf"><span data-page-node-id="yV2M0Tv0ISO1XHAoEW9Xh7">9.8V 空</span><span data-page-node-id="I4TDQT3Ercj12VWxYdpJPe">10.6V 满</span></div>
+        <div class="kv" style="margin-top:10px" data-page-node-id="i3HkoxF7VyZW0tF1Td6UbW"><span class="k" data-page-node-id="yB9HgdzcSkhQ6pnPiuOeAu">供电方式</span><span class="v" data-page-node-id="J2Zs0n9tBbdi83cge8ecpu">内置锂电 10.8V / 120Ah</span></div>
+        <div class="kv" data-page-node-id="OzZHcBzOEXSKXTNlsyDQNn"><span class="k" data-page-node-id="CJzEuAx3sZktKhstMmFyxo">按当前功耗预计可用</span><span class="v num" data-page-node-id="c5Unz7SZGcc1Cbe6Kjjeub">约 46 天</span></div>
+      </div>
+
+      <div class="card" style="padding:0" data-page-node-id="xft6nO1aRxEDH4YMlwFeD9">
+        <div class="field" data-page-node-id="ICyvhnTfAzr4ST6BNuxQLq"><span class="lb" data-page-node-id="TH9xECVcCNklNRA5w9s4gK">长供电模式<s data-page-node-id="OySYReScBw7HQ3wdvbIjQ0">PwrEn · 调试时使用</s></span><span class="sp" data-page-node-id="0kGPjXOr802ZCd9e2OO7A6"><button class="sw" onclick="sw(this)" data-page-node-id="1nDiAa6uBpj8Z8VvIossVS"><i data-page-node-id="oArIfCPeJ4KGd0BIPDJdVC"></i></button></span></div>
+        <div class="field" data-page-node-id="gmGW73XrwhYu6SPSyveBGI"><span class="lb" data-page-node-id="vYfsA7wFSTqHaJw4dkxUAl">电压下限保护</span><span class="sp" data-page-node-id="MWO5vgRcNB3BX76U7nbHnH"><input class="inp mini num" value="9.80" data-page-node-id="OtHFd7LnJhb6HOU99TflUT"><span class="unit" data-page-node-id="ODhxxn2RSAKB47MDKboaV0">V</span></span></div>
+      </div>
+
+      <div class="sec" data-page-node-id="59sUzL6mUU84pKf0Qlu3nd"><h3 data-page-node-id="8XbEndQbjXU8u2mXsi03gx">固件版本</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="IDHvlDZ90aEp9YoiXpAMxx">
+        <div class="field" data-page-node-id="xXGSkpw6HszYDE7BBUFhAc"><span class="lb" data-page-node-id="coryaGoySCGBlQXsZDWQvI">RTU 主控固件<s data-page-node-id="ynI843wmW32ktXP1mOHllP">当前版本</s></span><span class="sp" data-page-node-id="uFXp2dw7itnEHaxTXqVrAg"><span class="val" data-page-node-id="HhjPzUxtymDDYfOELldIlo">V250708</span><span class="chip b" onclick="toast('已选择固件包')" style="cursor:pointer" data-page-node-id="pheMXrhEdYJMKBY7K5aXK2">上传升级包</span></span></div>
+        <div class="field" data-page-node-id="xGaGKDuCVopfyzwzKZ0dUc"><span class="lb" data-page-node-id="MwsBhkqbHPt6s5uH1cEVHQ">雷达流量计 LHRV-300</span><span class="sp" data-page-node-id="ZLdinBEE2acFAOYDiyCM0E"><span class="val" data-page-node-id="w6Dygo9xwSBlQCoxaa14JK">V250708</span><span class="chip b" onclick="toast('已选择固件包')" style="cursor:pointer" data-page-node-id="1PziQHjmNGKcEUKzGBeZCA">上传升级包</span></span></div>
+        <div class="field" data-page-node-id="5G7VvF5xr02PzHnOD7d2kd"><span class="lb" data-page-node-id="J6RDGpSPnVDq2FHTzJsgrn">雷达水位计 LHRW-200</span><span class="sp" data-page-node-id="sAx5WtoUtqF1xXGNToDCsF"><span class="val" data-page-node-id="bdazd8Ov42zxscvB50PQVh">V250627</span><span class="chip w" onclick="toast('已有新版本可升级')" style="cursor:pointer" data-page-node-id="JmFb2X8DHEmFA2lmznTXlY">有新版本</span></span></div>
+      </div>
+
+      <div class="card tight" data-page-node-id="GQKbXxuwCpT9znkwiLmiui">
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:8px" data-page-node-id="IRXPggOn287G84JXerxUWG"><span style="font-weight:600" data-page-node-id="6PNB8tFza2Fu9U98ETsSZK">正在升级 雷达水位计</span><span class="num" style="color:var(--brand);font-weight:700" data-page-node-id="WmEHZ4gBqQPOHlIdazsM0t">62%</span></div>
+        <div style="height:7px;border-radius:7px;background:var(--surface-3);overflow:hidden" data-page-node-id="SUICbeV6xJxmVywuHzzev9"><div style="height:100%;width:62%;border-radius:7px;background:var(--brand)" data-page-node-id="efGuG9A0OeIChtpkyDkwa3"></div></div>
+        <p style="font-size:10.5px;color:var(--text-3);margin:9px 0 0" data-page-node-id="RePwRY4t0mifvoCD727HKc">升级期间平台 RPC 通道暂停，蓝牙保持连接；请勿断电或离开现场。</p>
+      </div>
+
+      <div class="btns" style="margin-top:14px" data-page-node-id="n3s9ESoBh6HDWizoEbohyN">
+        <button class="btn" onclick="toast('已开始检查更新')" data-page-node-id="wq78RY93LZGCuqVFQGUO18">检查全部更新</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 设备维护 ========== -->
+  <section class="screen" id="s-maintain" data-page-node-id="NNMtCdk29B6o0qPiSDAvKB">
+    <div class="hd" data-page-node-id="EWM6H9A47zPNeWB92spakC"><button class="back" onclick="back()" data-page-node-id="XiDZXSoNxmxe44N3cmtLkn"><span data-ic="back" data-page-node-id="2j6Ic6pNE09wQ1VUdIfSbu"></span></button>
+      <div data-page-node-id="r10Oo1On08IWzNEnRbQxvT"><div class="ttl" data-page-node-id="i7c9PH1GqG6UqLmsAcNSap">设备维护</div><div class="sub" data-page-node-id="FHPSybdqsxRIJQvjZntVlr">时间校验 · 复位 · 恢复出厂</div></div></div>
+    <div class="body" data-page-node-id="aGT6KcWkniqk2yeIqn4dlj">
+      <div class="sec" data-page-node-id="0X4x6GRZA9zTFKMbxSwjpw"><h3 data-page-node-id="onDPDFcUOdPFPYmoqXAQPE">时间</h3></div>
+      <div class="card" style="padding:0" data-page-node-id="wG0aOVKUkwMTwNRTwy9UV7">
+        <div class="field" data-page-node-id="KcHpDKymg8xkdgwtdHQvWg"><span class="lb" data-page-node-id="d7s7XkgYwde95iGKi5r8HS">设备系统时间</span><span class="sp" data-page-node-id="GnoTPitWxpyKag6BfJDLKQ"><span class="val num" data-page-node-id="cAEFMWlIv7BabCalfbuGrw">2025-07-09 08:55:57</span></span></div>
+        <div class="field" data-page-node-id="KSKdBuQRtYjrleHRCdYJ1L"><span class="lb" data-page-node-id="iobHo4vKAPzebcM45iTyAC">与服务器偏差</span><span class="sp" data-page-node-id="CNWJUpprGuaZj5GPh4tzUm"><span class="val" style="color:var(--ok)" data-page-node-id="TAsk8s6uNOLONHBYK1R7Z4">已校准 · 0.4s</span></span></div>
+      </div>
+      <button class="btn gh" style="margin-bottom:14px" onclick="toast('已用手机时间同步设备')" data-page-node-id="HbikoIuCEGLfvZamIXd0FD">用手机时间同步</button>
+
+      <div class="sec" data-page-node-id="uiD5xsGJEhxhFhB7aWKCeu"><h3 data-page-node-id="yjWjGAVAlaS4cQrqC7Z4LC">运行控制</h3></div>
+      <div class="row" onclick="toast('已下发停止指令，设备将在当前周期后停止')" data-page-node-id="PZvmijHG0MT68EUWL2DaHV"><span class="ic" data-ic="pause" data-page-node-id="WIFsqb0jc9nfP007W5RpEh"></span><div class="tx" data-page-node-id="K5lFXCpAieyVUvgsAmoYvQ"><div class="a" data-page-node-id="VHbKyexLE7AHxVWgiHgmqB">设备停止</div><div class="b" data-page-node-id="50QESb8JJvWBJyu3B8V7D9">停止后续周期采样与上传</div></div><span class="chev" data-ic="chev" data-page-node-id="uOqs2j1BPBVA0spcHh8tDg"></span></div>
+      <div class="row" onclick="openDlg('dlg-zero')" data-page-node-id="L2LnXdRql5MWnAK1l6h1r3"><span class="ic" data-ic="reset" data-page-node-id="6mlM85m1zjlonkJMzQgWqs"></span><div class="tx" data-page-node-id="QaDqCDHHZq4ZR7CdBOrevw"><div class="a" data-page-node-id="8PP7B772IBBpDbZi5jJ9RT">清空累计流量</div><div class="b" data-page-node-id="T0A3CSJEtX9Tr2tcOVvlrv">净 / 正向 / 反向 / 绝对值及进位次数</div></div><span class="chev" data-ic="chev" data-page-node-id="Mxo7etj7AzTB4HTorbuUzd"></span></div>
+      <div class="row" onclick="toast('网络模组复位中…')" data-page-node-id="rEe2S8SPHillhHySbZ7Iom"><span class="ic" data-ic="wifi" data-page-node-id="BxH9X2DcleiylftN5L0ypa"></span><div class="tx" data-page-node-id="IzeXlfqGsbxV7HAF5V7RGP"><div class="a" data-page-node-id="ggLJGLKD93C1sx92ImGw3P">复位初始化网络</div><div class="b" data-page-node-id="rNcON3dnwlaWJXNFyETgC1">重新附着网络并获取 IP</div></div><span class="chev" data-ic="chev" data-page-node-id="Ds1yF5ev2F79lXr3hDMf9Q"></span></div>
+      <div class="row" onclick="openDlg('dlg-reboot')" data-page-node-id="1hYvUTN7cw7wHkUIeXRjr2"><span class="ic" data-ic="power" data-page-node-id="bhDgDYGxELbuql4xwlvjxD"></span><div class="tx" data-page-node-id="BPHgGBOTUpHNdAaT1XS61F"><div class="a" data-page-node-id="khPcC5l9jczfBoTmDdGaB1">复位重启</div><div class="b" data-page-node-id="VzbSqG6PccMSpc0j71jNug">设备断电重启，约 30s 恢复</div></div><span class="chev" data-ic="chev" data-page-node-id="egoU8KKjmMaHDKfUJaxyd2"></span></div>
+
+      <div class="sec" data-page-node-id="MdgDxjuF5H6XPy03GqmzHB"><h3 data-page-node-id="F1OaGpix26Hs0ivHqpfZYK">危险操作</h3></div>
+      <div class="row" style="border-color:#F7D5D5" onclick="openDlg('dlg-factory')" data-page-node-id="6uRNtUPnN4Gq3rEidS9N3o"><span class="ic" style="background:var(--err-l);color:var(--err)" data-ic="tool" data-page-node-id="26nDVXhrlOT63IrOomfWVd"></span><div class="tx" data-page-node-id="1l7en7C4fhRE38ncqZoZ89"><div class="a" style="color:var(--err)" data-page-node-id="jFvD6oNtTBkFaYRKe0rT7T">恢复出厂设置</div><div class="b" data-page-node-id="ROeeTkmEpqdY7GJTtdQGIm">清空全部配置与本地数据，不可撤销</div></div><span class="chev" data-ic="chev" data-page-node-id="ORxPOhHI9V07IfJeXBcOiN"></span></div>
+
+      <div class="sec" data-page-node-id="lnSS8SDJPF5AN7qpemr3JT"><h3 data-page-node-id="FlaBs6VKpQGxE8vFU2sA5D">诊断日志</h3></div>
+      <div class="card tight" data-page-node-id="u8KkOLYSR7SE9uYFl8aS42">
+        <div class="kv" data-page-node-id="O8hFOIxnbn8eQbnT7ypbga"><span class="k" data-page-node-id="c141MAuF9rkKDqe6VeaDQm">最近上传</span><span class="v" style="color:var(--ok)" data-page-node-id="kCIt3c60Jx8aBgugBlx8QD">成功 15:08:24</span></div>
+        <div class="kv" data-page-node-id="lX1eaHvBTlQkPFigXdyF0X"><span class="k" data-page-node-id="5eznzfi3a4OVJIZBgFkQpN">最近错误</span><span class="v" data-page-node-id="PHGS2p0am2PBxVCn4x13nC">12:05 网络注册超时（代码 00002）</span></div>
+        <div class="kv" data-page-node-id="dqdpHDl3rjtviTOaA1G8bJ"><span class="k" data-page-node-id="M02BkHeFgwPtHXzcGk84J5">设备运行时长</span><span class="v num" data-page-node-id="uOcE0PwRBB7ewiaUHfLBKN">128 天 6 小时</span></div>
+      </div>
+      <button class="btn gh" style="margin-top:4px" onclick="toast('日志已打包为 Excel 导出')" data-page-node-id="ECH58NWARJsFLCVrXWJFBO">导出诊断日志</button>
+    </div>
+  </section>
+
+  <!-- 底部 Tab -->
+  <nav class="tabbar" id="tabbar" data-page-node-id="RgupSvR0aDfznHs8ukhLVt">
+    <button data-tab="home" onclick="tabTo('home')" data-page-node-id="4lXrqJdJkhzUjsvyZh5nJy"><span data-ic="home" data-page-node-id="lKRi1E92723jbFzdS7Lbc0"></span>概览</button>
+    <button data-tab="monitor" onclick="tabTo('monitor')" data-page-node-id="7DOFaeVvbOVclU7BT7gM1C"><span data-ic="gauge" data-page-node-id="f40ayM8PHXJejSMPoto2Og"></span>监测</button>
+    <button data-tab="data" onclick="tabTo('data')" data-page-node-id="paaSmhcGSSecd5pU1GZ72o"><span data-ic="chart" data-page-node-id="eUVHNckmdikC0CLnyRGG31"></span>数据</button>
+    <button data-tab="settings" onclick="tabTo('settings')" data-page-node-id="dHjbUpE2zmPSXwhDJLW3AA"><span data-ic="cog" data-page-node-id="4njABFTZANNemiBvNXZu8F"></span>设置</button>
+  </nav>
+
+  <!-- 弹窗 -->
+  <div class="mask" id="mask" data-page-node-id="elmLzIF7Uf4IjCB9c2HMT4">
+    <div class="dlg" id="dlg-export" style="display:none" data-page-node-id="H7S9KdZCgk5MJsD1rzXSNj">
+      <h4 data-page-node-id="0eIDT5QoXdChu38cHJVnCN">导出监测数据</h4>
+      <p data-page-node-id="K8LfprHcxuoU4hxtNJKIg0">将设备本地存储的 12 842 条记录导出为 Excel 文件，可直接用于现场比对与存档。</p>
+      <div class="fld" data-page-node-id="aIaHDgACRwcYbHT9GDc5pJ"><span class="lb" data-page-node-id="5m9vcJZ4tahOD9G0fDoeAj">时间范围</span><div class="pick" style="margin:0;flex:1;border:1px solid var(--line-2);border-radius:9px;padding:8px 11px" data-page-node-id="VMb0usIrEHrd6mglXQYwND">近 7 天 <span data-ic="chev" data-page-node-id="Fr0KepodEZbqgehNt06HSR"></span></div></div>
+      <div class="fld" data-page-node-id="BOXWwTnn8Zuj3l2mcz11nO"><span class="lb" data-page-node-id="g3WMPH5bqrAUTEqehyN4t3">数据项</span><div class="pick" style="margin:0;flex:1;border:1px solid var(--line-2);border-radius:9px;padding:8px 11px" data-page-node-id="AKuOXKAvAD4hfWD5bCZ7xZ">全部参数 <span data-ic="chev" data-page-node-id="I43ofweaimFAUMz5BE6XaJ"></span></div></div>
+      <div class="btns" data-page-node-id="mDpEKbWZa6PGgqE31wLqMp"><button class="btn gh" onclick="closeDlg()" data-page-node-id="llwPhfk6xMN2k0ze2Da4e6">取消</button><button class="btn" onclick="closeDlg();toast('已生成 7天数据.xlsx')" data-page-node-id="xRJATagm9kR6lJcitC0FYE">开始导出</button></div>
+    </div>
+    <div class="dlg" id="dlg-zero" style="display:none" data-page-node-id="liFPZ5iTq5P8Fo9oLjtN4S">
+      <h4 data-page-node-id="51v1vhUuBQMClbvgiLWxWq">清空累计流量？</h4>
+      <p data-page-node-id="0cdiI83hkFK3h5juXmvhP2">将把净累计、正向、反向、绝对值累计流量及进位次数全部归零。历史记录中的累计值不受影响。</p>
+      <div class="btns" data-page-node-id="ikD016DKJ7NEvD65y31F1Z"><button class="btn gh" onclick="closeDlg()" data-page-node-id="GsmopXguoEycNiiKF4zYg6">取消</button><button class="btn dg" onclick="closeDlg();toast('累计流量已清零')" data-page-node-id="u3R451PeUBDkpBnHvSiGrR">确认清零</button></div>
+    </div>
+    <div class="dlg" id="dlg-reboot" style="display:none" data-page-node-id="6oYeu73Zl8wS8uoB2ILQfz">
+      <h4 data-page-node-id="eZlzN2EhWTSD4gIyUgVaib">复位重启设备？</h4>
+      <p data-page-node-id="UhDQOUZCBIoKobM8x2YFqT">设备将断电重启，期间无法采集与上传数据，约 30 秒后自动恢复。请确认已保存参数。</p>
+      <div class="btns" data-page-node-id="P9LArZvrJV8XVTGGp5gx84"><button class="btn gh" onclick="closeDlg()" data-page-node-id="03lhWlbTaeBHusJmPb9dxj">取消</button><button class="btn dg" onclick="closeDlg();toast('复位指令已下发')" data-page-node-id="Rjb9iueqHpC6na764SpReB">确认重启</button></div>
+    </div>
+    <div class="dlg" id="dlg-factory" style="display:none" data-page-node-id="3nWwFq5itdwD5oBE1he0WJ">
+      <h4 data-page-node-id="5Vqj9ePn3gVkgcw9zNprYa">恢复出厂设置？</h4>
+      <p data-page-node-id="Dux7YRiVC4Qb7pV8kvLUBI">将清空 MN 号、IP 端口、断面与率定系数、报警阈值及本地历史数据，且无法撤销。建议先导出数据与配置模板。</p>
+      <div class="btns" data-page-node-id="woYwMsAvMSnCFbR6bFGxqo"><button class="btn gh" onclick="closeDlg()" data-page-node-id="g3ChdmPj131PeqLcqo6Tmf">取消</button><button class="btn dg" onclick="closeDlg();toast('恢复出厂已取消，请先导出数据')" data-page-node-id="6DIcql4eXn03zz0OfGjwyC">我确认，恢复出厂</button></div>
+    </div>
+    <div class="dlg" id="dlg-del" style="display:none" data-page-node-id="4gV6J4BEJOdYMRYqEwG304">
+      <h4 data-page-node-id="0sGNVOayGrzCrbLEyC1qdl">删除本地数据</h4>
+      <p data-page-node-id="hAyk8dB8XGCaZGVLIQqs5F">用于剔除现场测试期间产生的无效数据，删除后不可恢复。</p>
+      <div class="fld" data-page-node-id="VfEfCA7PezjL2W2yKdJrJv"><span class="lb" data-page-node-id="b9TT7oWKS65t49RgQyYwer">时间范围</span><div class="pick" style="margin:0;flex:1;border:1px solid var(--line-2);border-radius:9px;padding:8px 11px" data-page-node-id="10ZbC2PZhe4TQWkh75iA6G">今日 11:00 – 12:30 <span data-ic="chev" data-page-node-id="XmRmep12xDOVhGrkHZ8roH"></span></div></div>
+      <div class="btns" data-page-node-id="wyTGHMxDhLGTHmaEzLNfnt"><button class="btn gh" onclick="closeDlg()" data-page-node-id="Mp8yOO90So99ZbcaHHOcGj">取消</button><button class="btn dg" onclick="closeDlg();toast('已删除 2 条测试数据')" data-page-node-id="GEyVZGfqPBDXrxNcniiQPm">删除</button></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" data-page-node-id="UO3bOhUuOWLZLXMucHZR3f"></div>
+
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const ICONS={
+  bt:'<path d="M7 7l10 10M17 7L7 17"/><path d="M7 12V7l5 5-5 5v-5z"/><path d="M12 2v20"/>',
+  battery:'<rect x="2" y="7" width="17" height="10" rx="3"/><path d="M22 11v2"/><rect x="5" y="10" width="9" height="4" rx="1" fill="currentColor" stroke="none"/>',
+  rtu:'<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h5"/><circle cx="16" cy="16.5" r="1.6"/>',
+  chev:'<path d="M9 6l6 6-6 6"/>',
+  back:'<path d="M15 6l-6 6 6 6"/>',
+  check:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.6 2.6L16 9.5"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.6"/>',
+  scan:'<path d="M3 8V5.5A2.5 2.5 0 015.5 3H8M16 3h2.5A2.5 2.5 0 0121 5.5V8M21 16v2.5A2.5 2.5 0 0118.5 21H16M8 21H5.5A2.5 2.5 0 013 18.5V16"/><path d="M3.5 12h17"/>',
+  upload:'<path d="M12 16V4M12 4l-4.2 4.2M12 4l4.2 4.2"/><path d="M4 16v2.5A1.5 1.5 0 005.5 20h13a1.5 1.5 0 001.5-1.5V16"/>',
+  cloud:'<path d="M7 18a4 4 0 01-.4-8 5.5 5.5 0 0110.6 1.2A3.5 3.5 0 0117 18H7z"/><path d="M12 12v5M12 12l-2 2M12 12l2 2"/>',
+  download:'<path d="M12 4v12M12 16l-4.2-4.2M12 16l4.2-4.2"/><path d="M4 18v1.5A1.5 1.5 0 005.5 21h13a1.5 1.5 0 001.5-1.5V18"/>',
+  play:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l5.5 3.5L10 15.5z" fill="currentColor" stroke="none"/>',
+  pause:'<circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/>',
+  refresh:'<path d="M20 12a8 8 0 11-2.6-5.9"/><path d="M20 4v4.5h-4.5"/>',
+  clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  plug:'<path d="M9 3v5M15 3v5"/><path d="M6 8h12v2.5a6 6 0 01-6 6 6 6 0 01-6-6V8z"/><path d="M12 16.5V21"/>',
+  ruler:'<path d="M3 15.5L15.5 3l5.5 5.5L8.5 21z"/><path d="M7.5 11.5l2 2M10.5 8.5l2 2M13.5 5.5l2 2"/>',
+  curve:'<path d="M3 19c4 0 4-12 8-12s4 8 8 8"/><circle cx="11" cy="7" r="1.6"/><circle cx="19" cy="15" r="1.6"/>',
+  bell:'<path d="M18 9a6 6 0 10-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M10.5 20a2 2 0 003 0"/>',
+  tool:'<path d="M14.5 5.5a4 4 0 105.2 5.2L21 12l-9 9-3-3 9-9z" /><path d="M6.5 3.5L4 6l3 3 2.5-2.5z"/>',
+  home:'<path d="M4 10.5L12 4l8 6.5V19a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 19v-8.5z"/><path d="M9.5 20.5V14h5v6.5"/>',
+  gauge:'<circle cx="12" cy="13" r="8"/><path d="M12 13l4-3.5"/><path d="M4.5 20.5h15"/>',
+  chart:'<path d="M4 20V4"/><path d="M4 20h16"/><path d="M7.5 16l3.5-5 3 3 5-7"/>',
+  cog:'<circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7M7.3 16.7l-1.7 1.7"/>',
+  flask:'<path d="M9 3h6M10 3v6l-4.5 9A1.5 1.5 0 006.9 20h10.2a1.5 1.5 0 001.4-2L14 9V3"/><path d="M7.5 14h9"/>',
+  code:'<path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/>',
+  wifi:'<path d="M4.5 9.5a11 11 0 0115 0M8 13a6.5 6.5 0 018 0"/><circle cx="12" cy="17.5" r="1.4" fill="currentColor" stroke="none"/>',
+  power:'<path d="M12 3v8"/><path d="M6.8 6.8a7.5 7.5 0 1010.4 0"/>',
+  reset:'<path d="M4.5 12a7.5 7.5 0 102.6-5.7"/><path d="M4 5v4.5h4.5"/>'
+};
+document.querySelectorAll('[data-ic]').forEach(function(el){
+  var k=el.getAttribute('data-ic');
+  if(!ICONS[k]) return;
+  el.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;display:block">'+ICONS[k]+'</svg>';
+});
+
+var TABS=['home','monitor','data','settings'];
+var stack=[], cur='connect';
+function render(){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.toggle('active',s.id===cur)});
+  var bar=document.getElementById('tabbar');
+  var isTab=TABS.indexOf(cur)>-1;
+  bar.style.display=isTab?'flex':'none';
+  bar.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.tab===cur)});
+  document.querySelectorAll('.navbtn').forEach(function(b){b.classList.toggle('on',b.dataset.go===cur)});
+  document.querySelectorAll('.body').forEach(function(b){b.scrollTop=0});
+}
+function tabTo(id){stack=[];cur=id;render()}
+function push(id){stack.push(cur);cur=id;render()}
+function back(){cur=stack.pop()||'home';render()}
+function go(id){ if(TABS.indexOf(id)>-1){tabTo(id)} else {push(id)} }
+document.querySelectorAll('[data-go]').forEach(function(b){b.addEventListener('click',function(){go(b.dataset.go)})});
+
+function sw(el){el.classList.toggle('on')}
+function segPick(el,label){[].forEach.call(el.parentNode.children,function(b){b.classList.remove('on')});el.classList.add('on');if(label&&label.length<12&&!['today','雷达流量计','雷达水位计','多参数水质'].includes(label)){toast('已切换：'+label)}}
+function toggleMeasure(el){
+  var on=el.classList.toggle('act');
+  el.querySelector('.lb').textContent=on?'停止测量':'开始测量';
+  el.querySelector('.ic').style.background=on?'#FCEAEA':'#E8F1FC';
+  el.querySelector('.ic').style.color=on?'#E04B4B':'#0A6FD8';
+  toast(on?'已开始测量':'已停止测量');
+}
+function connectDev(n){toast('已连接 '+n);setTimeout(function(){tabTo('home')},600)}
+
+var mask=document.getElementById('mask');
+function openDlg(id){mask.classList.add('on');document.querySelectorAll('.dlg').forEach(function(d){d.style.display=d.id===id?'block':'none'})}
+function closeDlg(){mask.classList.remove('on')}
+mask.addEventListener('click',function(e){if(e.target===mask)closeDlg()});
+
+var tEl=document.getElementById('toast'),tTimer=null;
+function toast(msg){tEl.textContent=msg;tEl.classList.add('on');clearTimeout(tTimer);tTimer=setTimeout(function(){tEl.classList.remove('on')},1900)}
+
+var base={lev:2.316,dep:1.842,vel:0.612,flow:1.036};
+setInterval(function(){
+  if(!['home','monitor'].includes(cur))return;
+  var d=(Math.random()-0.5);
+  base.lev=Math.max(2.24,Math.min(2.60,base.lev+d*0.006));
+  base.dep=base.lev-0.474;
+  base.vel=Math.max(0.50,Math.min(0.72,base.vel+d*0.004));
+  base.flow=Math.max(0.90,Math.min(1.20,base.vel*1.694));
+  document.querySelectorAll('[data-live="lev"]').forEach(function(e){e.innerHTML=base.lev.toFixed(3)+'<s>m</s>'});
+  document.querySelectorAll('[data-live="dep"]').forEach(function(e){e.innerHTML=base.dep.toFixed(3)+'<s>m</s>'});
+  document.querySelectorAll('[data-live="vel"]').forEach(function(e){e.innerHTML=base.vel.toFixed(3)+'<s>m/s</s>'});
+  document.querySelectorAll('[data-live="flow"]').forEach(function(e){e.innerHTML=base.flow.toFixed(3)+'<s>m³/s</s>'});
+},2400);
+
+render();
+</script>
+</body>
+</html>
